@@ -15,6 +15,7 @@ export default function IntakePage() {
   
   const [mounted, setMounted] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [started, setStarted] = useState(false);
 
   // Mock Sandbox State
   const [activeMockPath, setActiveMockPath] = useState(0);
@@ -31,9 +32,21 @@ export default function IntakePage() {
   };
 
   const focusConsole = () => {
-    if (consoleRef.current) {
-      consoleRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
+    setStarted(true);
+    setTimeout(() => {
+      if (consoleRef.current) {
+        consoleRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, 100);
+  };
+
+  const handleGetStarted = () => {
+    setStarted(true);
+    setTimeout(() => {
+      if (consoleRef.current) {
+        consoleRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, 100);
   };
 
   async function handleSubmit() {
@@ -104,7 +117,7 @@ export default function IntakePage() {
               <div className="w-2.5 h-2.5 bg-accent rounded-[2px]" />
             </div>
             <span className="font-mono text-sm tracking-[0.2em] font-bold text-main glow-text-indigo">
-              PATHSMITH
+              PATHFINDER
             </span>
           </div>
 
@@ -114,9 +127,6 @@ export default function IntakePage() {
             </button>
             <button onClick={() => scrollSection("sandbox")} className="hover:text-main transition-colors duration-200">
               Interactive Sandbox
-            </button>
-            <button onClick={() => scrollSection("pricing")} className="hover:text-main transition-colors duration-200">
-              Pricing
             </button>
           </nav>
         </div>
@@ -163,7 +173,7 @@ export default function IntakePage() {
               className="font-sans font-bold text-4xl sm:text-6xl uppercase tracking-tight leading-[0.95] text-main"
             >
               Model your life.<br />
-              <span className="text-accent">Simulate in PathSmith.</span>
+              <span className="text-accent">Simulate in PathFinder.</span>
             </motion.h1>
             
             <motion.p 
@@ -176,171 +186,210 @@ export default function IntakePage() {
             </motion.p>
           </div>
 
+          <AnimatePresence>
+            {!started && (
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: -15 }}
+                transition={{ duration: 0.5, ease: "easeInOut" }}
+                className="pt-4 flex flex-col items-center gap-4"
+              >
+                <button
+                  onClick={handleGetStarted}
+                  className="glow-btn relative overflow-hidden group border-2 border-accent bg-accent text-white font-mono text-xs tracking-[0.2em] px-8 py-4 rounded-full font-bold uppercase shadow-lg shadow-accent/15 hover:shadow-xl hover:shadow-accent/25 transition-all duration-300 hover:scale-105"
+                >
+                  <span className="relative z-10 flex items-center gap-2">
+                    Get Started <span className="text-sm font-sans">→</span>
+                  </span>
+                  <span className="absolute inset-0 bg-gradient-to-r from-accent-glow via-accent to-accent-glow opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-full" />
+                </button>
+                <p className="text-[10px] font-mono text-muted tracking-wider uppercase font-bold">
+                  Unfold the simulator dashboard
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Prompt Console Widget */}
           <motion.div
             ref={consoleRef}
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="w-full max-w-2xl mx-auto border border-border-dim bg-surface/75 backdrop-blur-md p-6 text-left rounded-2xl shadow-lg shadow-accent/5 border-border-dim/80"
+            initial={false}
+            animate={
+              started 
+                ? { opacity: 1, scale: 1, height: "auto", rotateX: 0, y: 0 } 
+                : { opacity: 0, scale: 0.92, height: 0, rotateX: -12, y: 20 }
+            }
+            style={{ transformOrigin: "top center", perspective: 1000 }}
+            transition={{ 
+              type: "spring", 
+              stiffness: 110, 
+              damping: 18, 
+              mass: 0.9,
+              height: { duration: 0.5 },
+              opacity: { duration: 0.4 }
+            }}
+            className="w-full max-w-2xl mx-auto border border-border-dim bg-surface/75 backdrop-blur-md text-left rounded-2xl shadow-lg shadow-accent/5 border-border-dim/80 overflow-hidden"
           >
-            <div className="space-y-4">
-              <div className="flex justify-between items-center border-b border-border-dim/40 pb-2">
-                <span className="font-mono text-[9px] text-muted uppercase font-bold">CONSOLE: DILEMMA_INPUT</span>
-                <div className="flex items-center space-x-1">
-                  <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-                  <span className="font-mono text-[9px] text-accent font-bold">READY</span>
+            {started && (
+              <div className="p-6 space-y-4">
+                <div className="flex justify-between items-center border-b border-border-dim/40 pb-2">
+                  <span className="font-mono text-[9px] text-muted uppercase font-bold">CONSOLE: DILEMMA_INPUT</span>
+                  <div className="flex items-center space-x-1">
+                    <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                    <span className="font-mono text-[9px] text-accent font-bold">READY</span>
+                  </div>
                 </div>
-              </div>
 
-              <div className="relative border border-border-dim bg-surface/40 p-4 rounded-xl">
-                <textarea
-                  id="dilemma-textarea"
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  placeholder="I am trying to decide whether to leave my corporate engineering job to start a boutique coffee shop, or accept a promotion that requires relocating to another country..."
-                  rows={4}
-                  disabled={loading}
-                  className="w-full bg-transparent p-0 text-sm resize-none focus:outline-none text-main placeholder-muted/60 font-sans leading-relaxed"
-                />
-                <div className="absolute bottom-3 right-3 font-mono text-[9px] text-gray-500 select-none">
-                  chars: {text.length}
+                <div className="relative border border-border-dim bg-surface/40 p-4 rounded-xl">
+                  <textarea
+                    id="dilemma-textarea"
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    placeholder="I am trying to decide whether to leave my corporate engineering job to start a boutique coffee shop, or accept a promotion that requires relocating to another country..."
+                    rows={4}
+                    disabled={loading}
+                    className="w-full bg-transparent p-0 text-sm resize-none focus:outline-none text-main placeholder-muted/60 font-sans leading-relaxed"
+                  />
+                  <div className="absolute bottom-3 right-3 font-mono text-[9px] text-muted select-none">
+                    chars: {text.length}
+                  </div>
                 </div>
-              </div>
 
-              {/* Collapsible settings toggle */}
-              <div className="border-t border-border-dim/40 pt-3">
-                <button
-                  onClick={() => setShowSettings(!showSettings)}
-                  className="flex justify-between items-center w-full font-mono text-[9px] tracking-widest text-muted hover:text-main uppercase transition-colors font-bold"
-                >
-                  <span>[⚙] Parameters Override</span>
-                  <span className="text-accent">
-                    {mounted ? `${config.provider.toUpperCase()} ENGINE` : "LOADING..."}{" "}
-                    {showSettings ? "▲" : "▼"}
-                  </span>
-                </button>
-
-                <AnimatePresence>
-                  {showSettings && mounted && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="pt-4 mt-3 border-t border-border-dim/40 space-y-4 font-mono text-[10px] text-muted">
-                        {/* Provider */}
-                        <div className="space-y-2">
-                          <label className="text-[9px] text-muted block uppercase font-bold">LLM Provider</label>
-                          <div className="grid grid-cols-3 gap-2">
-                            {["openai", "gemini", "ollama"].map((p) => (
-                              <button
-                                key={p}
-                                onClick={() => setConfig({ provider: p })}
-                                className={`border p-2 text-[9px] font-bold tracking-wider uppercase transition-all duration-300 rounded-xl ${
-                                  config.provider === p
-                                    ? "border-accent bg-accent/10 text-accent font-bold"
-                                    : "border-border-dim text-muted hover:border-accent hover:text-accent bg-white"
-                                }`}
-                              >
-                                {p}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Credentials conditional input */}
-                        {config.provider !== "ollama" ? (
-                          <div className="space-y-1">
-                            <label className="text-[9px] text-muted block uppercase font-bold">
-                              {config.provider.toUpperCase()} API Key
-                            </label>
-                            <input
-                              type="password"
-                              value={config.api_key || ""}
-                              onChange={(e) => setConfig({ api_key: e.target.value })}
-                              placeholder={
-                                config.provider === "openai"
-                                  ? "sk-... (defaults to backend env if empty)"
-                                  : "AIzaSy... (defaults to backend env if empty)"
-                              }
-                              className="w-full bg-surface border border-border-dim px-3 py-2 text-main placeholder-muted/60 focus:outline-none focus:border-accent text-[10px] rounded-xl"
-                            />
-                          </div>
-                        ) : (
-                          <div className="space-y-1">
-                            <label className="text-[9px] text-muted block uppercase font-bold">Ollama URL</label>
-                            <input
-                              type="text"
-                              value={config.base_url || ""}
-                              onChange={(e) => setConfig({ base_url: e.target.value })}
-                              placeholder="http://localhost:11434/v1"
-                              className="w-full bg-surface border border-border-dim px-3 py-2 text-main focus:outline-none focus:border-accent text-[10px] rounded-xl"
-                            />
-                          </div>
-                        )}
-
-                        {/* Custom overrides */}
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="space-y-1">
-                            <label className="text-[9px] text-muted block uppercase font-bold">Fast Model</label>
-                            <input
-                              type="text"
-                              value={config.model_fast || ""}
-                              onChange={(e) => setConfig({ model_fast: e.target.value })}
-                              placeholder={
-                                config.provider === "openai"
-                                  ? "gpt-4o-mini"
-                                  : config.provider === "gemini"
-                                  ? "gemini-1.5-flash"
-                                  : "gemma2"
-                              }
-                              className="w-full bg-surface border border-border-dim px-3 py-2 text-main focus:outline-none focus:border-accent text-[10px] rounded-xl"
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <label className="text-[9px] text-muted block uppercase font-bold">Powerful Model</label>
-                            <input
-                              type="text"
-                              value={config.model_powerful || ""}
-                              onChange={(e) => setConfig({ model_powerful: e.target.value })}
-                              placeholder={
-                                config.provider === "openai"
-                                  ? "gpt-4o"
-                                  : config.provider === "gemini"
-                                  ? "gemini-1.5-pro"
-                                  : "llama3"
-                              }
-                              className="w-full bg-surface border border-border-dim px-3 py-2 text-main focus:outline-none focus:border-accent text-[10px] rounded-xl"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* Submit Trigger */}
-              <div className="pt-2">
-                {loading ? (
-                  <LoadingSkeleton rows={2} />
-                ) : (
+                {/* Collapsible settings toggle */}
+                <div className="border-t border-border-dim/40 pt-3">
                   <button
-                    id="analyse-button"
-                    onClick={handleSubmit}
-                    disabled={!text.trim()}
-                    className="w-full border border-accent bg-accent/5 hover:bg-accent hover:text-white font-mono text-[10px] tracking-widest py-3.5 text-accent transition-all duration-300 disabled:opacity-30 disabled:pointer-events-none shadow-[0_0_15px_rgba(52,144,139,0.05)] hover:shadow-[0_0_20px_rgba(52,144,139,0.15)] font-bold uppercase rounded-xl"
+                    onClick={() => setShowSettings(!showSettings)}
+                    className="flex justify-between items-center w-full font-mono text-[9px] tracking-widest text-muted hover:text-main uppercase transition-colors font-bold"
                   >
-                    INITIALIZE SCENARIO DECRYPTOR →
+                    <span>[⚙] Parameters Override</span>
+                    <span className="text-accent">
+                      {mounted ? `${config.provider.toUpperCase()} ENGINE` : "LOADING..."}{" "}
+                      {showSettings ? "▲" : "▼"}
+                    </span>
                   </button>
-                )}
+
+                  <AnimatePresence>
+                    {showSettings && mounted && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="pt-4 mt-3 border-t border-border-dim/40 space-y-4 font-mono text-[10px] text-muted">
+                          {/* Provider */}
+                          <div className="space-y-2">
+                            <label className="text-[9px] text-muted block uppercase font-bold">LLM Provider</label>
+                            <div className="grid grid-cols-3 gap-2">
+                              {["openai", "gemini", "ollama"].map((p) => (
+                                <button
+                                  key={p}
+                                  onClick={() => setConfig({ provider: p })}
+                                  className={`border p-2 text-[9px] font-bold tracking-wider uppercase transition-all duration-300 rounded-xl ${
+                                    config.provider === p
+                                      ? "border-accent bg-accent/10 text-accent font-bold"
+                                      : "border-border-dim text-muted hover:border-accent hover:text-accent bg-white"
+                                  }`}
+                                >
+                                  {p
+                                }</button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Credentials conditional input */}
+                          {config.provider !== "ollama" ? (
+                            <div className="space-y-1">
+                              <label className="text-[9px] text-muted block uppercase font-bold">
+                                {config.provider.toUpperCase()} API Key
+                              </label>
+                              <input
+                                type="password"
+                                value={config.api_key || ""}
+                                onChange={(e) => setConfig({ api_key: e.target.value })}
+                                placeholder={
+                                  config.provider === "openai"
+                                    ? "sk-... (defaults to backend env if empty)"
+                                    : "AIzaSy... (defaults to backend env if empty)"
+                                }
+                                className="w-full bg-surface border border-border-dim px-3 py-2 text-main placeholder-muted/60 focus:outline-none focus:border-accent text-[10px] rounded-xl"
+                              />
+                            </div>
+                          ) : (
+                            <div className="space-y-1">
+                              <label className="text-[9px] text-muted block uppercase font-bold">Ollama URL</label>
+                              <input
+                                type="text"
+                                value={config.base_url || ""}
+                                onChange={(e) => setConfig({ base_url: e.target.value })}
+                                placeholder="http://localhost:11434/v1"
+                                className="w-full bg-surface border border-border-dim px-3 py-2 text-main focus:outline-none focus:border-accent text-[10px] rounded-xl"
+                              />
+                            </div>
+                          )}
+
+                          {/* Custom overrides */}
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1">
+                              <label className="text-[9px] text-muted block uppercase font-bold">Fast Model</label>
+                              <input
+                                type="text"
+                                value={config.model_fast || ""}
+                                onChange={(e) => setConfig({ model_fast: e.target.value })}
+                                placeholder={
+                                  config.provider === "openai"
+                                    ? "gpt-4o-mini"
+                                    : config.provider === "gemini"
+                                    ? "gemini-1.5-flash"
+                                    : "gemma2"
+                                }
+                                className="w-full bg-surface border border-border-dim px-3 py-2 text-main focus:outline-none focus:border-accent text-[10px] rounded-xl"
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-[9px] text-muted block uppercase font-bold">Powerful Model</label>
+                              <input
+                                type="text"
+                                value={config.model_powerful || ""}
+                                onChange={(e) => setConfig({ model_powerful: e.target.value })}
+                                placeholder={
+                                  config.provider === "openai"
+                                    ? "gpt-4o"
+                                    : config.provider === "gemini"
+                                    ? "gemini-1.5-pro"
+                                    : "llama3"
+                                }
+                                className="w-full bg-surface border border-border-dim px-3 py-2 text-main focus:outline-none focus:border-accent text-[10px] rounded-xl"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Submit Trigger */}
+                <div className="pt-2">
+                  {loading ? (
+                    <LoadingSkeleton rows={2} />
+                  ) : (
+                    <button
+                      id="analyse-button"
+                      onClick={handleSubmit}
+                      disabled={!text.trim()}
+                      className="w-full border border-accent bg-accent/5 hover:bg-accent hover:text-white font-mono text-[10px] tracking-widest py-3.5 text-accent transition-all duration-300 disabled:opacity-30 disabled:pointer-events-none shadow-[0_0_15px_rgba(52,144,139,0.05)] hover:shadow-[0_0_20px_rgba(52,144,139,0.15)] font-bold uppercase rounded-xl"
+                    >
+                      INITIALIZE SCENARIO DECRYPTOR →
+                    </button>
+                  )}
+                </div>
+                
+                {error && <ErrorBlock message={error} />}
               </div>
-              
-              {error && <ErrorBlock message={error} />}
-            </div>
+            )}
           </motion.div>
         </div>
       </section>
@@ -362,7 +411,7 @@ export default function IntakePage() {
             Unified Engine for Future Paths
           </h2>
           <p className="text-muted text-xs sm:text-sm max-w-lg mx-auto font-medium">
-            PathSmith combines cognitive psychology and LLM modeling layers to test pathways in a sandbox before commit.
+            PathFinder combines cognitive psychology and LLM modeling layers to test pathways in a sandbox before commit.
           </p>
         </div>
 
@@ -419,7 +468,7 @@ export default function IntakePage() {
             Interactive Mock Sandbox
           </h2>
           <p className="text-muted text-xs max-w-md mx-auto font-medium">
-            Toggle between these sample scenarios to preview how PathSmith quantifies and diagrams outcomes.
+            Toggle between these sample scenarios to preview how PathFinder quantifies and diagrams outcomes.
           </p>
         </div>
 
@@ -519,81 +568,7 @@ export default function IntakePage() {
         </div>
       </motion.section>
 
-      {/* 5. Pricing Section */}
-      <motion.section 
-        id="pricing" 
-        initial={{ opacity: 0, y: 35 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="py-24 px-6 md:px-12 border-b border-border-dim/50 max-w-6xl mx-auto w-full space-y-16"
-      >
-        <div className="text-center space-y-3">
-          <span className="font-mono text-[9px] tracking-widest text-accent font-bold uppercase">
-            PRICING PLANS
-          </span>
-          <h2 className="font-sans font-bold text-3xl uppercase tracking-tight text-white">
-            Pricing built for every scale
-          </h2>
-          <p className="text-gray-400 text-xs max-w-md mx-auto">
-            Choose a plan that fits your strategy needs, from free local models to high-volume enterprise pipelines.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono">
-          {/* Card 1 */}
-          <div className="border border-border-dim bg-surface/10 p-6 flex flex-col justify-between h-[380px] relative rounded-2xl">
-            <div className="space-y-6">
-              <div className="space-y-1">
-                <span className="text-[9px] text-gray-500 tracking-wider block uppercase">FREE PLAN</span>
-                <h3 className="font-sans font-bold text-2xl text-white">$0</h3>
-              </div>
-              <p className="text-gray-400 text-xs font-sans leading-relaxed">
-                Standard dilemma dilemma, 3 parallel paths, and integration with local Ollama endpoints out-of-the-box.
-              </p>
-            </div>
-            <button onClick={focusConsole} className="w-full border border-border-dim py-2.5 text-xs text-gray-400 hover:border-white hover:text-white hover:bg-white/5 transition-all duration-300 rounded-full">
-              GET STARTED
-            </button>
-          </div>
-
-          {/* Card 2 */}
-          <div className="border border-border-bright bg-border-bright/5 p-6 flex flex-col justify-between h-[380px] relative rounded-2xl">
-            <div className="absolute top-3 right-3 bg-border-bright text-black font-bold px-2.5 py-0.5 text-[8px] tracking-widest uppercase rounded-full">
-              POPULAR
-            </div>
-            
-            <div className="space-y-6">
-              <div className="space-y-1">
-                <span className="text-[9px] text-border-bright tracking-wider block uppercase">STRATEGIST PLAN</span>
-                <h3 className="font-sans font-bold text-2xl text-white">$15<span className="text-xs text-gray-400">/mo</span></h3>
-              </div>
-              <p className="text-gray-400 text-xs font-sans leading-relaxed">
-                Includes deeper What-If sandboxes (up to 5 levels), API key overrides for Gemini and OpenAI GPT-4o-mini, and bias summary exports.
-              </p>
-            </div>
-            <button onClick={focusConsole} className="w-full border border-border-bright bg-border-bright py-2.5 text-xs text-black font-bold hover:opacity-90 transition-opacity rounded-full">
-              UPGRADE NOW
-            </button>
-          </div>
-
-          {/* Card 3 */}
-          <div className="border border-border-dim bg-surface/10 p-6 flex flex-col justify-between h-[380px] relative rounded-2xl">
-            <div className="space-y-6">
-              <div className="space-y-1">
-                <span className="text-[9px] text-gray-500 tracking-wider block uppercase">ENTERPRISE PLAN</span>
-                <h3 className="font-sans font-bold text-2xl text-white">Custom</h3>
-              </div>
-              <p className="text-gray-400 text-xs font-sans leading-relaxed">
-                Unlimited concurrent session logs, custom model mappings, priority API rate allocations, and dedicated enterprise support.
-              </p>
-            </div>
-            <button onClick={focusConsole} className="w-full border border-border-dim py-2.5 text-xs text-gray-400 hover:border-white hover:text-white hover:bg-white/5 transition-all duration-300 rounded-full">
-              CONTACT SALES
-            </button>
-          </div>
-        </div>
-      </motion.section>
+      {/* 5. Pricing Section Removed */}
 
       {/* 6. Footer Section */}
       <footer className="bg-bg border-t border-border-dim/80 py-12 px-6 md:px-12 mt-auto font-mono text-[10px] text-gray-500">
@@ -603,12 +578,12 @@ export default function IntakePage() {
               <div className="w-2.5 h-2.5 bg-accent rounded-[2px]" />
             </div>
             <span className="tracking-[0.2em] font-bold text-main text-[11px]">
-              PATHSMITH
+              PATHFINDER
             </span>
           </div>
           
           <div className="flex space-x-6 text-[9px] uppercase tracking-wider">
-            <span>© 2026 PathSmith. All Rights Reserved.</span>
+            <span>© 2026 PathFinder. All Rights Reserved.</span>
           </div>
         </div>
       </footer>

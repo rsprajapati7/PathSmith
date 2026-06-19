@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "PathSmith — Life Decision Simulator",
+  title: "PathFinder — Life Decision Simulator",
   description: "An AI-powered cognitive strategy engine to detect biases, clarify life constraints, and model branching future paths.",
 };
 
