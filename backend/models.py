@@ -27,7 +27,7 @@ class ClarifyingQuestion(BaseModel):
 
 class StartSessionResponse(BaseModel):
     session_id: Optional[str] = Field(default=None, description="Populated by the server")
-    detected_biases: List[str] = Field(description="Up to 3 cognitive biases detected in the dilemma")
+    detected_biases: List[str] = Field(description="Up to 3 cognitive biases detected in the dilemma, each formatted strictly as 'Bias Name: 1-2 line explanation'")
     clarifying_questions: List[ClarifyingQuestion] = Field(description="Exactly 3 clarifying questions")
 
 class GeneratePathsResponse(BaseModel):

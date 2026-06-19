@@ -62,11 +62,18 @@ def get_llm(config: Optional[dict], is_powerful: bool, temperature: float = 0.3)
     wait=wait_exponential(multiplier=1, min=2, max=8),
 )
 async def run_start_session(dilemma: str, config: Optional[dict] = None) -> StartSessionResponse:
-    llm = get_llm(config, is_powerful=False)
-    structured_llm = llm.with_structured_output(StartSessionResponse)
-    prompt = ChatPromptTemplate.from_template(START_SESSION_PROMPT)
-    chain = prompt | structured_llm
-    return await chain.ainvoke({"dilemma": dilemma})
+    print(f"[run_start_session] Starting with config: {config}")
+    try:
+        llm = get_llm(config, is_powerful=False)
+        structured_llm = llm.with_structured_output(StartSessionResponse)
+        prompt = ChatPromptTemplate.from_template(START_SESSION_PROMPT)
+        chain = prompt | structured_llm
+        res = await chain.ainvoke({"dilemma": dilemma})
+        print(f"[run_start_session] Success: {res}")
+        return res
+    except Exception as e:
+        print(f"[run_start_session] Error: {e}")
+        raise e
 
 @retry(
     retry=retry_if_exception_type((ValidationError, ValueError)),
@@ -74,11 +81,18 @@ async def run_start_session(dilemma: str, config: Optional[dict] = None) -> Star
     wait=wait_exponential(multiplier=1, min=2, max=8),
 )
 async def run_generate_paths(dilemma: str, answers: dict, config: Optional[dict] = None) -> GeneratePathsResponse:
-    llm = get_llm(config, is_powerful=False)
-    structured_llm = llm.with_structured_output(GeneratePathsResponse)
-    prompt = ChatPromptTemplate.from_template(GENERATE_PATHS_PROMPT)
-    chain = prompt | structured_llm
-    return await chain.ainvoke({"dilemma": dilemma, "answers": str(answers)})
+    print(f"[run_generate_paths] Starting with config: {config}")
+    try:
+        llm = get_llm(config, is_powerful=False)
+        structured_llm = llm.with_structured_output(GeneratePathsResponse)
+        prompt = ChatPromptTemplate.from_template(GENERATE_PATHS_PROMPT)
+        chain = prompt | structured_llm
+        res = await chain.ainvoke({"dilemma": dilemma, "answers": str(answers)})
+        print(f"[run_generate_paths] Success: {res}")
+        return res
+    except Exception as e:
+        print(f"[run_generate_paths] Error: {e}")
+        raise e
 
 @retry(
     retry=retry_if_exception_type((ValidationError, ValueError)),
@@ -86,11 +100,18 @@ async def run_generate_paths(dilemma: str, answers: dict, config: Optional[dict]
     wait=wait_exponential(multiplier=1, min=2, max=8),
 )
 async def run_what_if(original_path, what_if_scenario: str, config: Optional[dict] = None) -> WhatIfResponse:
-    llm = get_llm(config, is_powerful=True)
-    structured_llm = llm.with_structured_output(WhatIfResponse)
-    prompt = ChatPromptTemplate.from_template(WHAT_IF_PROMPT)
-    chain = prompt | structured_llm
-    return await chain.ainvoke({
-        "original_path": original_path.model_dump_json(),
-        "what_if_scenario": what_if_scenario,
-    })
+    print(f"[run_what_if] Starting with config: {config}")
+    try:
+        llm = get_llm(config, is_powerful=True)
+        structured_llm = llm.with_structured_output(WhatIfResponse)
+        prompt = ChatPromptTemplate.from_template(WHAT_IF_PROMPT)
+        chain = prompt | structured_llm
+        res = await chain.ainvoke({
+            "original_path": original_path.model_dump_json(),
+            "what_if_scenario": what_if_scenario,
+        })
+        print(f"[run_what_if] Success: {res}")
+        return res
+    except Exception as e:
+        print(f"[run_what_if] Error: {e}")
+        raise e
