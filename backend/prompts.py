@@ -40,7 +40,7 @@ Rules:
 - Keep all integers in range 1-10.
 - Be specific in the updated timeline entries.
 
-Output ONLY valid JSON matching the WhatIfResponse schema. No preamble, no markdown.
+Output ONLY valid JSON matching the Path schema. No preamble, no markdown.
 
 ORIGINAL PATH:
 {original_path}

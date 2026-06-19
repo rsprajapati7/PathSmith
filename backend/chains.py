@@ -9,7 +9,7 @@ from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import ValidationError
-from models import StartSessionResponse, GeneratePathsResponse, WhatIfResponse
+from models import StartSessionResponse, GeneratePathsResponse, WhatIfResponse, Path
 from prompts import START_SESSION_PROMPT, GENERATE_PATHS_PROMPT, WHAT_IF_PROMPT
 
 def get_llm(config: Optional[dict], is_powerful: bool, temperature: float = 0.3):
@@ -103,13 +103,18 @@ async def run_what_if(original_path, what_if_scenario: str, config: Optional[dic
     print(f"[run_what_if] Starting with config: {config}")
     try:
         llm = get_llm(config, is_powerful=True)
-        structured_llm = llm.with_structured_output(WhatIfResponse)
+        structured_llm = llm.with_structured_output(Path)
         prompt = ChatPromptTemplate.from_template(WHAT_IF_PROMPT)
         chain = prompt | structured_llm
-        res = await chain.ainvoke({
+        modified_path = await chain.ainvoke({
             "original_path": original_path.model_dump_json(),
             "what_if_scenario": what_if_scenario,
         })
+        res = WhatIfResponse(
+            original_path_id=original_path.path_id,
+            what_if_scenario=what_if_scenario,
+            modified_path=modified_path
+        )
         print(f"[run_what_if] Success: {res}")
         return res
     except Exception as e:
