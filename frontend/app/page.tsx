@@ -8,7 +8,7 @@ import { ErrorBlock } from "@/components/ui/ErrorBlock";
 
 export default function IntakePage() {
   const router = useRouter();
-  const { dilemma, setDilemma, setSession, reset, config, setConfig } = useDecisionStore();
+  const { dilemma, setDilemma, setSession, reset, config, setConfig, profileContext, setProfileContext } = useDecisionStore();
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -16,6 +16,11 @@ export default function IntakePage() {
   const [mounted, setMounted] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [started, setStarted] = useState(false);
+
+  // File Upload State
+  const [uploading, setUploading] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   // Mock Sandbox State
   const [activeMockPath, setActiveMockPath] = useState(0);
@@ -49,14 +54,57 @@ export default function IntakePage() {
     }, 100);
   };
 
+  async function processFile(file: File) {
+    setUploading(true);
+    setUploadError(null);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/upload_document", {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.detail ?? "Failed to upload document");
+      }
+      const data = await res.json();
+      setProfileContext(data.text);
+      setUploadedFileName(file.name);
+    } catch (err: any) {
+      setUploadError(err.message || "Failed to process document");
+      setProfileContext("");
+      setUploadedFileName(null);
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await processFile(file);
+  }
+
+  function handleRemoveFile() {
+    setProfileContext("");
+    setUploadedFileName(null);
+    setUploadError(null);
+  }
+
   async function handleSubmit() {
     if (!text.trim()) return;
     setLoading(true);
     setError(null);
     
-    // Reset state before starting a new session
+    // Reset dilemma state before starting a new session but preserve uploaded profile context if loaded
+    const currentProfile = profileContext;
     reset();
     setDilemma(text);
+    if (currentProfile) {
+      setProfileContext(currentProfile);
+    }
 
     try {
       const res = await fetch("/api/start_session", {
@@ -64,7 +112,8 @@ export default function IntakePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           dilemma: text,
-          config: mounted ? config : undefined 
+          config: mounted ? config : undefined,
+          profile_context: mounted && currentProfile ? currentProfile : undefined
         }),
       });
       if (!res.ok) {
@@ -246,6 +295,64 @@ export default function IntakePage() {
                   <div className="absolute bottom-3 right-3 font-mono text-[9px] text-muted select-none">
                     chars: {text.length}
                   </div>
+                </div>
+
+                {/* Premium RAG Document Uploader */}
+                <div className="border border-dashed border-border-dim bg-surface/30 hover:border-accent/40 p-4 rounded-xl transition-all duration-300">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <div className="flex items-center space-x-3 w-full sm:w-auto">
+                      <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent shrink-0 font-bold">
+                        🗎
+                      </div>
+                      <div className="text-left">
+                        <p className="text-[10px] font-mono font-bold text-main uppercase tracking-wider">
+                          User Profile Grounding (RAG)
+                        </p>
+                        <p className="text-[9px] text-muted leading-relaxed">
+                          Upload resume or transcript (.pdf, .txt) to personalize paths.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="w-full sm:w-auto flex justify-end">
+                      {uploading ? (
+                        <div className="flex items-center space-x-2 font-mono text-[9px] text-accent font-bold">
+                          <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                          </svg>
+                          <span>Processing...</span>
+                        </div>
+                      ) : uploadedFileName ? (
+                        <div className="flex items-center space-x-2 border border-accent bg-accent/5 px-2.5 py-1.5 rounded-lg font-mono text-[9px]">
+                          <span className="text-accent font-bold truncate max-w-[120px]">{uploadedFileName}</span>
+                          <button
+                            type="button"
+                            onClick={handleRemoveFile}
+                            className="text-muted hover:text-danger font-bold cursor-pointer"
+                            title="Remove file"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ) : (
+                        <label className="border border-border-dim hover:border-accent hover:bg-accent/5 px-3 py-1.5 rounded-lg font-mono text-[9px] text-muted hover:text-accent font-bold uppercase tracking-wider cursor-pointer transition-all duration-300 block text-center w-full sm:w-auto">
+                          Upload File
+                          <input
+                            type="file"
+                            accept=".pdf,.txt"
+                            onChange={handleFileUpload}
+                            className="hidden"
+                          />
+                        </label>
+                      )}
+                    </div>
+                  </div>
+                  {uploadError && (
+                    <p className="text-[9px] font-mono text-danger mt-2 font-bold uppercase">
+                      ⚠ {uploadError}
+                    </p>
+                  )}
                 </div>
 
                 {/* Collapsible settings toggle */}

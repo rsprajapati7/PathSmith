@@ -11,6 +11,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from pydantic import ValidationError
 from models import StartSessionResponse, GeneratePathsResponse, WhatIfResponse, Path
 from prompts import START_SESSION_PROMPT, GENERATE_PATHS_PROMPT, WHAT_IF_PROMPT
+from langchain_community.tools import DuckDuckGoSearchRun
 
 def get_llm(config: Optional[dict], is_powerful: bool, temperature: float = 0.3):
     if not config:
@@ -56,6 +57,17 @@ def get_llm(config: Optional[dict], is_powerful: bool, temperature: float = 0.3)
     else:
         raise ValueError(f"Unsupported LLM provider: {provider}")
 
+def run_web_search(query: str) -> str:
+    print(f"[web_search] Querying DuckDuckGo: {query}")
+    try:
+        search = DuckDuckGoSearchRun()
+        res = search.run(query)
+        print(f"[web_search] Success. Snippet length: {len(res)}")
+        return res
+    except Exception as e:
+        print(f"[web_search] Error fetching search: {e}")
+        return "(No live web research trends available due to search api limit/error)"
+
 class QuotaExhaustedException(Exception):
     pass
 
@@ -64,24 +76,35 @@ class QuotaExhaustedException(Exception):
     stop=stop_after_attempt(3),
     wait=wait_exponential(multiplier=1, min=2, max=8),
 )
-async def _invoke_start_session(dilemma: str, config: Optional[dict] = None) -> StartSessionResponse:
+async def _invoke_start_session(dilemma: str, config: Optional[dict] = None, profile_context: Optional[str] = None) -> StartSessionResponse:
     llm = get_llm(config, is_powerful=False)
     structured_llm = llm.with_structured_output(StartSessionResponse)
     prompt = ChatPromptTemplate.from_template(START_SESSION_PROMPT)
     chain = prompt | structured_llm
-    return await chain.ainvoke({"dilemma": dilemma})
+    profile = profile_context or "(No profile context provided)"
+    return await chain.ainvoke({"dilemma": dilemma, "profile_context": profile})
 
 @retry(
     retry=retry_if_exception_type((ValidationError, ValueError)),
     stop=stop_after_attempt(3),
     wait=wait_exponential(multiplier=1, min=2, max=8),
 )
-async def _invoke_generate_paths(dilemma: str, answers: dict, config: Optional[dict] = None) -> GeneratePathsResponse:
+async def _invoke_generate_paths(dilemma: str, answers: dict, config: Optional[dict] = None, profile_context: Optional[str] = None) -> GeneratePathsResponse:
+    # Get live search trends
+    search_query = f"market trends salary stats for {dilemma[:80]}"
+    market_research = run_web_search(search_query)
+
     llm = get_llm(config, is_powerful=False)
     structured_llm = llm.with_structured_output(GeneratePathsResponse)
     prompt = ChatPromptTemplate.from_template(GENERATE_PATHS_PROMPT)
     chain = prompt | structured_llm
-    return await chain.ainvoke({"dilemma": dilemma, "answers": str(answers)})
+    profile = profile_context or "(No profile context provided)"
+    return await chain.ainvoke({
+        "dilemma": dilemma,
+        "answers": str(answers),
+        "profile_context": profile,
+        "market_research": market_research
+    })
 
 @retry(
     retry=retry_if_exception_type((ValidationError, ValueError)),
@@ -98,10 +121,10 @@ async def _invoke_what_if(original_path, what_if_scenario: str, config: Optional
         "what_if_scenario": what_if_scenario,
     })
 
-async def run_start_session(dilemma: str, config: Optional[dict] = None) -> StartSessionResponse:
+async def run_start_session(dilemma: str, config: Optional[dict] = None, profile_context: Optional[str] = None) -> StartSessionResponse:
     print(f"[run_start_session] Starting with config: {config}")
     try:
-        res = await _invoke_start_session(dilemma, config)
+        res = await _invoke_start_session(dilemma, config, profile_context)
         print(f"[run_start_session] Success: {res}")
         return res
     except Exception as e:
@@ -114,7 +137,7 @@ async def run_start_session(dilemma: str, config: Optional[dict] = None) -> Star
                 fallback_config["model_fast"] = "gemma-4-31b-it"
                 fallback_config["model_powerful"] = "gemma-4-31b-it"
                 try:
-                    res = await _invoke_start_session(dilemma, fallback_config)
+                    res = await _invoke_start_session(dilemma, fallback_config, profile_context)
                     print(f"[run_start_session] Success (fallback): {res}")
                     return res
                 except Exception as fallback_err:
@@ -127,10 +150,10 @@ async def run_start_session(dilemma: str, config: Optional[dict] = None) -> Star
         print(f"[run_start_session] Error: {e}")
         raise e
 
-async def run_generate_paths(dilemma: str, answers: dict, config: Optional[dict] = None) -> GeneratePathsResponse:
+async def run_generate_paths(dilemma: str, answers: dict, config: Optional[dict] = None, profile_context: Optional[str] = None) -> GeneratePathsResponse:
     print(f"[run_generate_paths] Starting with config: {config}")
     try:
-        res = await _invoke_generate_paths(dilemma, answers, config)
+        res = await _invoke_generate_paths(dilemma, answers, config, profile_context)
         print(f"[run_generate_paths] Success: {res}")
         return res
     except Exception as e:
@@ -143,7 +166,7 @@ async def run_generate_paths(dilemma: str, answers: dict, config: Optional[dict]
                 fallback_config["model_fast"] = "gemma-4-31b-it"
                 fallback_config["model_powerful"] = "gemma-4-31b-it"
                 try:
-                    res = await _invoke_generate_paths(dilemma, answers, fallback_config)
+                    res = await _invoke_generate_paths(dilemma, answers, fallback_config, profile_context)
                     print(f"[run_generate_paths] Success (fallback): {res}")
                     return res
                 except Exception as fallback_err:

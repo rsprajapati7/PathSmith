@@ -1,18 +1,19 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useDecisionStore } from "@/store/decisionStore";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import { ErrorBlock } from "@/components/ui/ErrorBlock";
 
 export default function ClarifyPage() {
   const router = useRouter();
-  const { dilemma, session_id, biases, questions, answers, setAnswers, setPaths } =
+  const { dilemma, session_id, biases, questions, answers, setAnswers, setPaths, config, setConfig, profileContext } =
     useDecisionStore();
   const [localAnswers, setLocalAnswers] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
 
   // Sync with store if already populated
   useEffect(() => {
@@ -41,7 +42,13 @@ export default function ClarifyPage() {
       const res = await fetch("/api/generate_paths", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ session_id, dilemma, answers: localAnswers }),
+        body: JSON.stringify({ 
+          session_id, 
+          dilemma, 
+          answers: localAnswers,
+          config,
+          profile_context: profileContext || undefined
+        }),
       });
       if (!res.ok) {
         const errData = await res.json();
@@ -74,14 +81,122 @@ export default function ClarifyPage() {
         transition={{ duration: 0.6 }}
         className="p-6 md:p-10 space-y-8 lg:max-h-screen lg:overflow-y-auto"
       >
-        <div className="space-y-2">
-          <span className="font-mono text-[9px] tracking-widest text-border-bright font-bold uppercase block">
-            SESSION ACTIVE
-          </span>
-          <h2 className="font-sans font-bold text-2xl uppercase tracking-tight text-main">
-            COGNITIVE BLUEPRINT
-          </h2>
+        <div className="flex justify-between items-start">
+          <div className="space-y-2">
+            <span className="font-mono text-[9px] tracking-widest text-border-bright font-bold uppercase block">
+              SESSION ACTIVE
+            </span>
+            <h2 className="font-sans font-bold text-2xl uppercase tracking-tight text-main">
+              COGNITIVE BLUEPRINT
+            </h2>
+          </div>
+          <button
+            onClick={() => setShowSettings(!showSettings)}
+            className="w-8 h-8 rounded-full border border-border-dim hover:border-accent flex items-center justify-center text-muted hover:text-accent transition-all duration-300 font-bold cursor-pointer"
+            title="Configure LLM"
+          >
+            ⚙
+          </button>
         </div>
+
+        <AnimatePresence>
+          {showSettings && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="overflow-hidden border border-border-dim bg-surface/50 p-4 rounded-xl space-y-4 font-mono text-[10px] text-muted"
+            >
+              {/* Provider */}
+              <div className="space-y-2">
+                <label className="text-[9px] text-muted block uppercase font-bold">LLM Provider</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {["openai", "gemini", "ollama"].map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => setConfig({ provider: p })}
+                      className={`border p-2 text-[9px] font-bold tracking-wider uppercase transition-all duration-300 rounded-xl ${
+                        config.provider === p
+                          ? "border-accent bg-accent/10 text-accent font-bold"
+                          : "border-border-dim text-muted hover:border-accent hover:text-accent bg-white"
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Credentials conditional input */}
+              {config.provider !== "ollama" ? (
+                <div className="space-y-1">
+                  <label className="text-[9px] text-muted block uppercase font-bold">
+                    {config.provider.toUpperCase()} API Key
+                  </label>
+                  <input
+                    type="password"
+                    value={config.api_key || ""}
+                    onChange={(e) => setConfig({ api_key: e.target.value })}
+                    placeholder={
+                      config.provider === "openai"
+                        ? "sk-... (defaults to backend env if empty)"
+                        : "AIzaSy... (defaults to backend env if empty)"
+                    }
+                    className="w-full bg-surface border border-border-dim px-3 py-2 text-main placeholder-muted/60 focus:outline-none focus:border-accent text-[10px] rounded-xl"
+                  />
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  <label className="text-[9px] text-muted block uppercase font-bold">Ollama URL</label>
+                  <input
+                    type="text"
+                    value={config.base_url || ""}
+                    onChange={(e) => setConfig({ base_url: e.target.value })}
+                    placeholder="http://localhost:11434/v1"
+                    className="w-full bg-surface border border-border-dim px-3 py-2 text-main focus:outline-none focus:border-accent text-[10px] rounded-xl"
+                  />
+                </div>
+              )}
+
+              {/* Custom overrides */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[9px] text-muted block uppercase font-bold">Fast Model</label>
+                  <input
+                    type="text"
+                    value={config.model_fast || ""}
+                    onChange={(e) => setConfig({ model_fast: e.target.value })}
+                    placeholder={
+                      config.provider === "openai"
+                        ? "gpt-4o-mini"
+                        : config.provider === "gemini"
+                        ? "gemma-4-31b-it"
+                        : "gemma2"
+                    }
+                    className="w-full bg-surface border border-border-dim px-3 py-2 text-main focus:outline-none focus:border-accent text-[10px] rounded-xl"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[9px] text-muted block uppercase font-bold">Powerful Model</label>
+                  <input
+                    type="text"
+                    value={config.model_powerful || ""}
+                    onChange={(e) => setConfig({ model_powerful: e.target.value })}
+                    placeholder={
+                      config.provider === "openai"
+                        ? "gpt-4o"
+                        : config.provider === "gemini"
+                        ? "gemma-4-31b-it"
+                        : "llama3"
+                    }
+                    className="w-full bg-surface border border-border-dim px-3 py-2 text-main focus:outline-none focus:border-accent text-[10px] rounded-xl"
+                  />
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <div className="space-y-4">
           <p className="font-mono text-[10px] text-muted tracking-wider uppercase font-bold">INPUT DILEMMA</p>

@@ -7,7 +7,7 @@ import { LoadingSkeleton } from "./LoadingSkeleton";
 import { ErrorBlock } from "./ui/ErrorBlock";
 
 export function WhatIfExplorer({ parentPath }: { parentPath: Path }) {
-  const { session_id, branches, addBranch } = useDecisionStore();
+  const { session_id, branches, addBranch, config } = useDecisionStore();
   const [scenario, setScenario] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,6 +25,7 @@ export function WhatIfExplorer({ parentPath }: { parentPath: Path }) {
           session_id,
           original_path: parentPath,
           what_if_scenario: scenario,
+          config,
         }),
       });
       if (!res.ok) {

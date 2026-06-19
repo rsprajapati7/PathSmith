@@ -1,14 +1,16 @@
 import uuid
 import os
-from fastapi import FastAPI, HTTPException
+import io
+from fastapi import FastAPI, HTTPException, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
+from pypdf import PdfReader
 from models import (
     StartSessionRequest, StartSessionResponse,
     GeneratePathsRequest, GeneratePathsResponse,
-    WhatIfRequest, WhatIfResponse,
+    WhatIfRequest, WhatIfResponse, UploadDocumentResponse,
 )
-from chains import run_start_session, run_generate_paths, run_what_if
+from chains import run_start_session, run_generate_paths, run_what_if, QuotaExhaustedException
 
 load_dotenv()
 
@@ -30,13 +32,39 @@ app.add_middleware(
 SESSION_STORE: dict = {}
 MAX_WHATIF_DEPTH = 2   # Prevent infinite branching
 
+@app.post("/api/upload_document", response_model=UploadDocumentResponse)
+async def upload_document(file: UploadFile = File(...)):
+    try:
+        contents = await file.read()
+        filename = file.filename.lower() if file.filename else ""
+        
+        if filename.endswith(".pdf"):
+            reader = PdfReader(io.BytesIO(contents))
+            text = ""
+            for page in reader.pages:
+                extracted = page.extract_text()
+                if extracted:
+                    text += extracted + "\n"
+        else:
+            text = contents.decode("utf-8", errors="ignore")
+            
+        text = text.strip()
+        if not text:
+            raise ValueError("The uploaded document appears to be empty or contains no extractable text.")
+            
+        return UploadDocumentResponse(text=text)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to parse document: {str(e)}")
+
 @app.post("/api/start_session", response_model=StartSessionResponse)
 async def start_session(body: StartSessionRequest):
     # Convert configuration schema to dict
     llm_config = body.config.model_dump() if body.config else None
     
     try:
-        result = await run_start_session(body.dilemma, llm_config)
+        result = await run_start_session(body.dilemma, llm_config, body.profile_context)
+    except QuotaExhaustedException as e:
+        raise HTTPException(status_code=429, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"LLM error: {str(e)}")
 
@@ -57,10 +85,12 @@ async def generate_paths(body: GeneratePathsRequest):
         raise HTTPException(status_code=404, detail="Session not found.")
     
     session = SESSION_STORE[body.session_id]
-    llm_config = session.get("config")
+    llm_config = body.config.model_dump() if body.config else session.get("config")
     
     try:
-        result = await run_generate_paths(body.dilemma, body.answers, llm_config)
+        result = await run_generate_paths(body.dilemma, body.answers, llm_config, body.profile_context)
+    except QuotaExhaustedException as e:
+        raise HTTPException(status_code=429, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"LLM error: {str(e)}")
 
@@ -83,10 +113,12 @@ async def explore_whatif(body: WhatIfRequest):
             detail=f"Maximum branching depth ({MAX_WHATIF_DEPTH}) reached for this path."
         )
 
-    llm_config = session.get("config")
+    llm_config = body.config.model_dump() if body.config else session.get("config")
 
     try:
         result = await run_what_if(body.original_path, body.what_if_scenario, llm_config)
+    except QuotaExhaustedException as e:
+        raise HTTPException(status_code=429, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"LLM error: {str(e)}")
 

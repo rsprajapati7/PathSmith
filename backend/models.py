@@ -50,13 +50,20 @@ class LLMConfig(BaseModel):
 class StartSessionRequest(BaseModel):
     dilemma: str
     config: Optional[LLMConfig] = None
+    profile_context: Optional[str] = None
 
 class GeneratePathsRequest(BaseModel):
     session_id: str
     dilemma: str
     answers: dict
+    config: Optional[LLMConfig] = None
+    profile_context: Optional[str] = None
 
 class WhatIfRequest(BaseModel):
     session_id: str
     original_path: Path
     what_if_scenario: str
+    config: Optional[LLMConfig] = None
+
+class UploadDocumentResponse(BaseModel):
+    text: str

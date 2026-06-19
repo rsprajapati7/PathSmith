@@ -45,12 +45,14 @@ interface DecisionStore {
   paths: Path[];
   branches: Record<string, Path[]>;   // path_id → child paths
   config: LLMConfig;
+  profileContext: string;
   setDilemma: (d: string) => void;
   setSession: (id: string, biases: string[], questions: ClarifyingQuestion[]) => void;
   setAnswers: (a: Record<string, string>) => void;
   setPaths: (paths: Path[]) => void;
   addBranch: (parentId: string, child: Path) => void;
   setConfig: (cfg: Partial<LLMConfig>) => void;
+  setProfileContext: (text: string) => void;
   reset: () => void;
 }
 
@@ -83,6 +85,7 @@ export const useDecisionStore = create<DecisionStore>((set) => ({
   paths: [],
   branches: {},
   config: getInitialConfig(),
+  profileContext: "",
   setDilemma: (d) => set({ dilemma: d }),
   setSession: (id, biases, questions) => set({ session_id: id, biases, questions }),
   setAnswers: (a) => set({ answers: a }),
@@ -102,6 +105,7 @@ export const useDecisionStore = create<DecisionStore>((set) => ({
       }
       return { config: newConfig };
     }),
+  setProfileContext: (text) => set({ profileContext: text }),
   reset: () =>
     set((state) => ({
       dilemma: "",
@@ -111,6 +115,7 @@ export const useDecisionStore = create<DecisionStore>((set) => ({
       answers: {},
       paths: [],
       branches: {},
+      profileContext: "",
       // Keep configuration persistent across sessions
       config: state.config,
     })),
