@@ -36,7 +36,7 @@ def get_llm(config: Optional[dict], is_powerful: bool, temperature: float = 0.3)
     elif provider == "gemini":
         model_name = model_powerful if is_powerful else model_fast
         if not model_name:
-            model_name = "gemma-4-31b-it"
+            model_name = "gemini-2.5-pro" if is_powerful else "gemini-2.5-flash"
         key = api_key or os.getenv("GEMINI_API_KEY")
         return ChatGoogleGenerativeAI(
             model=model_name,
@@ -90,9 +90,10 @@ async def _invoke_start_session(dilemma: str, config: Optional[dict] = None, pro
     wait=wait_exponential(multiplier=1, min=2, max=8),
 )
 async def _invoke_generate_paths(dilemma: str, answers: dict, config: Optional[dict] = None, profile_context: Optional[str] = None) -> GeneratePathsResponse:
-    # Get live search trends
+    # Get live search trends asynchronously to prevent blocking the event loop
+    import asyncio
     search_query = f"market trends salary stats for {dilemma[:80]}"
-    market_research = run_web_search(search_query)
+    market_research = await asyncio.to_thread(run_web_search, search_query)
 
     llm = get_llm(config, is_powerful=False)
     structured_llm = llm.with_structured_output(GeneratePathsResponse)
