@@ -78,7 +78,9 @@ class QuotaExhaustedException(Exception):
 )
 async def _invoke_start_session(dilemma: str, config: Optional[dict] = None, profile_context: Optional[str] = None) -> StartSessionResponse:
     llm = get_llm(config, is_powerful=False)
-    structured_llm = llm.with_structured_output(StartSessionResponse)
+    provider = config.get("provider", "openai").lower() if config else "openai"
+    method = "json_mode" if provider == "ollama" else None
+    structured_llm = llm.with_structured_output(StartSessionResponse, method=method)
     prompt = ChatPromptTemplate.from_template(START_SESSION_PROMPT)
     chain = prompt | structured_llm
     profile = profile_context or "(No profile context provided)"
@@ -96,7 +98,9 @@ async def _invoke_generate_paths(dilemma: str, answers: dict, config: Optional[d
     market_research = await asyncio.to_thread(run_web_search, search_query)
 
     llm = get_llm(config, is_powerful=False)
-    structured_llm = llm.with_structured_output(GeneratePathsResponse)
+    provider = config.get("provider", "openai").lower() if config else "openai"
+    method = "json_mode" if provider == "ollama" else None
+    structured_llm = llm.with_structured_output(GeneratePathsResponse, method=method)
     prompt = ChatPromptTemplate.from_template(GENERATE_PATHS_PROMPT)
     chain = prompt | structured_llm
     profile = profile_context or "(No profile context provided)"
@@ -114,7 +118,9 @@ async def _invoke_generate_paths(dilemma: str, answers: dict, config: Optional[d
 )
 async def _invoke_what_if(original_path, what_if_scenario: str, config: Optional[dict] = None) -> Path:
     llm = get_llm(config, is_powerful=True)
-    structured_llm = llm.with_structured_output(Path)
+    provider = config.get("provider", "openai").lower() if config else "openai"
+    method = "json_mode" if provider == "ollama" else None
+    structured_llm = llm.with_structured_output(Path, method=method)
     prompt = ChatPromptTemplate.from_template(WHAT_IF_PROMPT)
     chain = prompt | structured_llm
     return await chain.ainvoke({
