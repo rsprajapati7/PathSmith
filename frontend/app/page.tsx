@@ -233,14 +233,6 @@ export default function IntakePage() {
           >
             {started && (
               <div className="p-6 space-y-4">
-                <div className="flex justify-between items-center border-b border-border-dim/40 pb-2">
-                  <span className="font-mono text-[9px] text-muted uppercase font-bold">CONSOLE: DILEMMA_INPUT</span>
-                  <div className="flex items-center space-x-1">
-                    <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-                    <span className="font-mono text-[9px] text-accent font-bold">READY</span>
-                  </div>
-                </div>
-
                 <div className="relative border border-border-dim bg-surface/40 p-4 rounded-xl">
                   <textarea
                     id="dilemma-textarea"
@@ -262,7 +254,7 @@ export default function IntakePage() {
                     onClick={() => setShowSettings(!showSettings)}
                     className="flex justify-between items-center w-full font-mono text-[9px] tracking-widest text-muted hover:text-main uppercase transition-colors font-bold"
                   >
-                    <span>[⚙] Parameters Override</span>
+                    <span>[⚙] Parameters</span>
                     <span className="text-accent">
                       {mounted ? `${config.provider.toUpperCase()} ENGINE` : "LOADING..."}{" "}
                       {showSettings ? "▲" : "▼"}
@@ -382,7 +374,7 @@ export default function IntakePage() {
                       disabled={!text.trim()}
                       className="w-full border border-accent bg-accent/5 hover:bg-accent hover:text-white font-mono text-[10px] tracking-widest py-3.5 text-accent transition-all duration-300 disabled:opacity-30 disabled:pointer-events-none shadow-[0_0_15px_rgba(52,144,139,0.05)] hover:shadow-[0_0_20px_rgba(52,144,139,0.15)] font-bold uppercase rounded-xl"
                     >
-                      INITIALIZE SCENARIO DECRYPTOR →
+                      HELP ME DECIDE →
                     </button>
                   )}
                 </div>
