@@ -35,7 +35,7 @@ def get_llm(config: Optional[dict], is_powerful: bool, temperature: float = 0.3)
     elif provider == "gemini":
         model_name = model_powerful if is_powerful else model_fast
         if not model_name:
-            model_name = "gemini-1.5-pro" if is_powerful else "gemini-1.5-flash"
+            model_name = "gemini-2.5-pro" if is_powerful else "gemini-2.5-flash"
         key = api_key or os.getenv("GEMINI_API_KEY")
         return ChatGoogleGenerativeAI(
             model=model_name,

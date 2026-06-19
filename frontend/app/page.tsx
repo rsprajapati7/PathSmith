@@ -334,7 +334,7 @@ export default function IntakePage() {
                                   config.provider === "openai"
                                     ? "gpt-4o-mini"
                                     : config.provider === "gemini"
-                                    ? "gemini-1.5-flash"
+                                    ? "gemini-2.5-flash"
                                     : "gemma2"
                                 }
                                 className="w-full bg-surface border border-border-dim px-3 py-2 text-main focus:outline-none focus:border-accent text-[10px] rounded-xl"
@@ -350,7 +350,7 @@ export default function IntakePage() {
                                   config.provider === "openai"
                                     ? "gpt-4o"
                                     : config.provider === "gemini"
-                                    ? "gemini-1.5-pro"
+                                    ? "gemini-2.5-pro"
                                     : "llama3"
                                 }
                                 className="w-full bg-surface border border-border-dim px-3 py-2 text-main focus:outline-none focus:border-accent text-[10px] rounded-xl"
