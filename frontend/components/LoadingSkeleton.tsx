@@ -5,36 +5,41 @@ export function LoadingSkeleton({ rows = 3 }: { rows?: number }) {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
+    // Logarithmic curve — fast at first, then slows near 94
     const interval = setInterval(() => {
       setProgress((prev) => {
-        if (prev >= 98) return 98;
-        return prev + Math.floor(Math.random() * 4) + 2;
+        if (prev >= 94) return prev;
+        const remaining = 94 - prev;
+        const increment = Math.max(1, Math.ceil(remaining * 0.12));
+        return Math.min(94, prev + increment);
       });
-    }, 250);
+    }, 280);
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="animate-pulse space-y-3.5 my-4">
-      <div className="flex justify-between items-center text-[10px] font-mono text-accent font-bold uppercase tracking-widest">
+    <div className="space-y-3 my-4">
+      {/* Header row */}
+      <div className="flex justify-between items-center">
         <div className="flex items-center space-x-2.5">
-          <div className="w-2 h-2 bg-accent rounded-full animate-ping" />
-          <span>loading...</span>
+          <div className="relative">
+            <div className="w-2.5 h-2.5 bg-accent rounded-full" />
+            <div className="absolute inset-0 w-2.5 h-2.5 bg-accent rounded-full animate-ping-slow" />
+          </div>
+          <span className="font-mono text-[9px] text-accent font-bold uppercase tracking-widest">
+            Processing
+          </span>
         </div>
-        <span className="text-muted font-mono text-[10px] tabular-nums">{progress}%</span>
+        <span className="font-mono text-[10px] text-muted tabular-nums font-bold">{progress}%</span>
       </div>
-      {Array.from({ length: rows }).map((_, i) => (
-        <div 
-          key={i} 
-          className="h-5 bg-surface/60 border border-border-dim/40 w-full flex items-center px-4 rounded-full"
-          style={{ animationDelay: `${i * 0.15}s` }}
-        >
-          <div 
-            className="h-1.5 bg-gradient-to-r from-accent/40 via-accent/15 to-transparent w-3/4 rounded-full animate-pulse"
-            style={{ animationDuration: "1.5s" }}
-          />
-        </div>
-      ))}
+
+      {/* Progress bar */}
+      <div className="h-1.5 bg-border-dim rounded-full overflow-hidden">
+        <div
+          className="h-full bg-accent rounded-full transition-all duration-300 ease-out"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
     </div>
   );
 }
