@@ -11,8 +11,7 @@ export function MetricBar({ label, value, previous }: MetricBarProps) {
   const decreased = previous !== undefined && value < previous;
 
   // Curated color configurations based on delta state
-  let labelColor = "text-gray-400";
-  let activeSegClass = "bg-white";
+  let activeSegClass = "bg-accent";
   let borderClass = "border-border-dim";
   let deltaText = "";
 
@@ -22,11 +21,9 @@ export function MetricBar({ label, value, previous }: MetricBarProps) {
     deltaText = ` (${sign}${diff})`;
     
     if (decreased) {
-      labelColor = "text-danger";
       activeSegClass = "bg-danger";
       borderClass = "border-danger shadow-[0_0_8px_rgba(244,63,94,0.3)]";
     } else {
-      labelColor = "text-accent";
       activeSegClass = "bg-accent";
       borderClass = "border-accent shadow-[0_0_8px_rgba(6,182,212,0.3)]";
     }
@@ -41,7 +38,7 @@ export function MetricBar({ label, value, previous }: MetricBarProps) {
         </span>
       </div>
       <div
-        className={`border h-5 w-full flex p-[2px] transition-all duration-300 ${borderClass}`}
+        className={`border h-5 w-full flex p-[2.5px] transition-all duration-300 rounded-full ${borderClass}`}
       >
         {Array.from({ length: 10 }).map((_, i) => {
           const isActive = i < value;
@@ -52,14 +49,10 @@ export function MetricBar({ label, value, previous }: MetricBarProps) {
             segColor = activeSegClass;
           }
 
-          // Special styling for changed segments
-          let segBorder = "border-r border-border-dim/30";
-          if (i === 9) segBorder = "";
-
           return (
             <div
               key={i}
-              className={`flex-1 transition-all duration-300 ${segColor} ${segBorder} h-full`}
+              className={`flex-1 transition-all duration-300 ${segColor} h-full rounded-full mx-[1px]`}
             />
           );
         })}

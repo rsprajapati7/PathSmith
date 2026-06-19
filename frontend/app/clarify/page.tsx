@@ -85,7 +85,7 @@ export default function ClarifyPage() {
 
         <div className="space-y-4">
           <p className="font-mono text-[10px] text-gray-500 tracking-wider uppercase">INPUT DILEMMA</p>
-          <blockquote className="border-l border-accent bg-accent/5 p-4 text-xs leading-relaxed italic text-gray-300 font-mono">
+          <blockquote className="border-l border-accent bg-accent/5 p-4 text-xs leading-relaxed italic text-gray-300 font-mono rounded-r-xl">
             &ldquo;{dilemma}&rdquo;
           </blockquote>
         </div>
@@ -102,7 +102,7 @@ export default function ClarifyPage() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.1 }}
-                  className="border border-danger/40 bg-danger/5 p-3 flex flex-col gap-1.5"
+                  className="border border-danger/40 bg-danger/5 p-3 flex flex-col gap-1.5 rounded-xl"
                 >
                   <span className="font-mono text-[10px] font-bold text-danger uppercase tracking-wider flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 bg-danger rounded-full" />
@@ -156,14 +156,14 @@ export default function ClarifyPage() {
                         key={opt}
                         onClick={() => selectAnswer(q.question_id, opt)}
                         disabled={loading}
-                        className={`border p-3 text-left transition-all duration-300 text-xs font-mono relative ${
+                        className={`border p-3 text-left transition-all duration-300 text-xs font-mono relative rounded-xl ${
                           isSelected
                             ? "border-accent bg-accent/10 text-white font-bold"
                             : "border-border-dim hover:border-gray-500 text-gray-400 hover:text-white"
                         }`}
                       >
                         {isSelected && (
-                          <div className="absolute top-0 right-0 w-1.5 h-1.5 bg-accent" />
+                          <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-accent rounded-full animate-pulse" />
                         )}
                         {opt}
                       </button>
@@ -183,7 +183,7 @@ export default function ClarifyPage() {
               id="generate-paths-button"
               onClick={handleGenerate}
               disabled={!allAnswered}
-              className="w-full border border-accent bg-accent/5 hover:bg-accent hover:text-black font-mono text-xs tracking-widest py-4 text-white transition-all duration-300 disabled:opacity-30 disabled:pointer-events-none shadow-[0_0_15px_rgba(6,182,212,0.05)] hover:shadow-[0_0_20px_rgba(6,182,212,0.2)] font-bold uppercase"
+              className="w-full border border-accent bg-accent/5 hover:bg-accent hover:text-black font-mono text-xs tracking-widest py-4 text-white transition-all duration-300 disabled:opacity-30 disabled:pointer-events-none shadow-[0_0_15px_rgba(6,182,212,0.05)] hover:shadow-[0_0_20px_rgba(6,182,212,0.2)] font-bold uppercase rounded-xl"
             >
               MODEL FUTURES MATRIX →
             </button>

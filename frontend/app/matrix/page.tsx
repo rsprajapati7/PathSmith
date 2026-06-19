@@ -27,7 +27,7 @@ export default function MatrixPage() {
         <span>NO GENERATED SCENARIOS REGISTERED IN SYSTEM MEMORY.</span>
         <button 
           onClick={handleRestart}
-          className="border border-border-dim px-4 py-2 hover:border-white hover:text-white transition-colors"
+          className="border border-border-dim px-4 py-2 hover:border-white hover:text-white transition-colors rounded-xl font-bold font-mono"
         >
           REBOOT SESSION
         </button>
@@ -52,7 +52,7 @@ export default function MatrixPage() {
         </div>
         <button 
           onClick={handleRestart}
-          className="font-mono text-[10px] tracking-widest border border-border-dim px-4 py-2 text-gray-400 hover:text-white hover:border-white hover:bg-white/5 transition-all duration-300 uppercase shrink-0 font-bold"
+          className="font-mono text-[10px] tracking-widest border border-border-dim px-4 py-2 text-gray-400 hover:text-white hover:border-white hover:bg-white/5 transition-all duration-300 uppercase shrink-0 font-bold rounded-xl"
         >
           [!] RESET SESSION
         </button>

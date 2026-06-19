@@ -55,12 +55,12 @@ export function WhatIfExplorer({ parentPath }: { parentPath: Path }) {
           onChange={(e) => setScenario(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
           placeholder="What if I..."
-          className="flex-1 bg-transparent border border-border-dim px-3 py-2 font-mono text-xs focus:border-accent outline-none text-white placeholder-gray-600 transition-all duration-300"
+          className="flex-1 bg-transparent border border-border-dim px-3 py-2 font-mono text-xs focus:border-accent outline-none text-white placeholder-gray-600 transition-all duration-300 rounded-xl"
         />
         <button
           onClick={handleSubmit}
           disabled={loading}
-          className="border border-accent px-4 py-2 font-mono text-xs text-accent hover:bg-accent hover:text-black transition-colors duration-300 disabled:opacity-40"
+          className="border border-accent px-4 py-2 font-mono text-xs text-accent hover:bg-accent hover:text-black transition-colors duration-300 disabled:opacity-40 rounded-xl"
         >
           SIMULATE →
         </button>

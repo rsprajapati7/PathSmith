@@ -100,8 +100,8 @@ export default function IntakePage() {
       <header className="sticky top-0 z-50 border-b border-border-dim/80 bg-bg/75 backdrop-blur-md px-6 md:px-12 py-3.5 flex justify-between items-center transition-all duration-300">
         <div className="flex items-center space-x-8">
           <div className="flex items-center space-x-2.5 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
-            <div className="w-5 h-5 border border-border-bright flex items-center justify-center relative">
-              <div className="w-2.5 h-2.5 bg-accent" />
+            <div className="w-5 h-5 border border-border-bright flex items-center justify-center relative rounded-md">
+              <div className="w-2.5 h-2.5 bg-accent rounded-[2px]" />
             </div>
             <span className="font-mono text-sm tracking-[0.2em] font-bold text-white glow-text-indigo">
               PATHSMITH
@@ -127,7 +127,7 @@ export default function IntakePage() {
           </span>
           <button
             onClick={focusConsole}
-            className="glow-btn border border-border-bright bg-border-bright/5 hover:bg-border-bright hover:text-black font-mono text-[10px] tracking-widest px-4 py-2 text-white transition-all duration-300 font-bold uppercase"
+            className="glow-btn border border-border-bright bg-border-bright/5 hover:bg-border-bright hover:text-black font-mono text-[10px] tracking-widest px-4 py-2 text-white transition-all duration-300 font-bold uppercase rounded-full"
           >
             Launch Simulator
           </button>
@@ -137,10 +137,10 @@ export default function IntakePage() {
       {/* 2. Hero Section (with embedded simulator) */}
       <section className="relative min-h-[90vh] flex flex-col items-center justify-center p-6 md:p-12 border-b border-border-dim/50">
         {/* Background glow effects */}
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-border-bright/5 rounded-full blur-[140px] pointer-events-none" />
-        <div className="absolute bottom-1/4 left-1/4 w-[300px] h-[300px] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-gold/5 rounded-full blur-[140px] pointer-events-none" />
+        <div className="absolute bottom-1/4 left-1/4 w-[300px] h-[300px] bg-accent-glow/10 rounded-full blur-[120px] pointer-events-none" />
 
-        <div className="w-full max-w-4xl text-center z-10 space-y-12">
+        <div className="w-full max-w-4xl text-center z-10 space-y-10">
           {/* Tagline */}
           <div className="space-y-4">
             <motion.div 
@@ -182,14 +182,8 @@ export default function IntakePage() {
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="w-full max-w-2xl mx-auto border border-border-dim bg-surface/40 backdrop-blur-md p-6 relative text-left"
+            className="w-full max-w-2xl mx-auto border border-border-dim bg-surface/40 backdrop-blur-md p-6 text-left rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.5)] border-border-dim/60"
           >
-            {/* Visual accent corner borders */}
-            <div className="absolute top-0 left-0 w-2.5 h-[1px] bg-border-bright" />
-            <div className="absolute top-0 left-0 w-[1px] h-2.5 bg-border-bright" />
-            <div className="absolute bottom-0 right-0 w-2.5 h-[1px] bg-border-bright" />
-            <div className="absolute bottom-0 right-0 w-[1px] h-2.5 bg-border-bright" />
-
             <div className="space-y-4">
               <div className="flex justify-between items-center border-b border-border-dim/40 pb-2">
                 <span className="font-mono text-[9px] text-gray-500 uppercase">CONSOLE: DILEMMA_INPUT</span>
@@ -199,7 +193,7 @@ export default function IntakePage() {
                 </div>
               </div>
 
-              <div className="relative">
+              <div className="relative border border-border-dim bg-surface/30 p-4 rounded-xl">
                 <textarea
                   id="dilemma-textarea"
                   value={text}
@@ -209,7 +203,7 @@ export default function IntakePage() {
                   disabled={loading}
                   className="w-full bg-transparent p-0 text-sm resize-none focus:outline-none text-white placeholder-gray-600 font-sans leading-relaxed"
                 />
-                <div className="absolute bottom-0 right-0 font-mono text-[9px] text-gray-500 select-none">
+                <div className="absolute bottom-3 right-3 font-mono text-[9px] text-gray-500 select-none">
                   chars: {text.length}
                 </div>
               </div>
@@ -245,7 +239,7 @@ export default function IntakePage() {
                               <button
                                 key={p}
                                 onClick={() => setConfig({ provider: p })}
-                                className={`border p-2 text-[9px] font-bold tracking-wider uppercase transition-all duration-300 ${
+                                className={`border p-2 text-[9px] font-bold tracking-wider uppercase transition-all duration-300 rounded-xl ${
                                   config.provider === p
                                     ? "border-accent bg-accent/10 text-white"
                                     : "border-border-dim text-gray-500 hover:border-gray-500 hover:text-white"
@@ -272,7 +266,7 @@ export default function IntakePage() {
                                   ? "sk-... (defaults to backend env if empty)"
                                   : "AIzaSy... (defaults to backend env if empty)"
                               }
-                              className="w-full bg-surface border border-border-dim px-3 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-accent text-[10px]"
+                              className="w-full bg-surface border border-border-dim px-3 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-accent text-[10px] rounded-xl"
                             />
                           </div>
                         ) : (
@@ -283,7 +277,7 @@ export default function IntakePage() {
                               value={config.base_url || ""}
                               onChange={(e) => setConfig({ base_url: e.target.value })}
                               placeholder="http://localhost:11434/v1"
-                              className="w-full bg-surface border border-border-dim px-3 py-2 text-white focus:outline-none focus:border-accent text-[10px]"
+                              className="w-full bg-surface border border-border-dim px-3 py-2 text-white focus:outline-none focus:border-accent text-[10px] rounded-xl"
                             />
                           </div>
                         )}
@@ -303,7 +297,7 @@ export default function IntakePage() {
                                   ? "gemini-1.5-flash"
                                   : "gemma2"
                               }
-                              className="w-full bg-surface border border-border-dim px-3 py-2 text-white focus:outline-none focus:border-accent text-[10px]"
+                              className="w-full bg-surface border border-border-dim px-3 py-2 text-white focus:outline-none focus:border-accent text-[10px] rounded-xl"
                             />
                           </div>
                           <div className="space-y-1">
@@ -319,7 +313,7 @@ export default function IntakePage() {
                                   ? "gemini-1.5-pro"
                                   : "llama3"
                               }
-                              className="w-full bg-surface border border-border-dim px-3 py-2 text-white focus:outline-none focus:border-accent text-[10px]"
+                              className="w-full bg-surface border border-border-dim px-3 py-2 text-white focus:outline-none focus:border-accent text-[10px] rounded-xl"
                             />
                           </div>
                         </div>
@@ -338,7 +332,7 @@ export default function IntakePage() {
                     id="analyse-button"
                     onClick={handleSubmit}
                     disabled={!text.trim()}
-                    className="w-full border border-border-bright bg-border-bright/5 hover:bg-border-bright hover:text-black font-mono text-[10px] tracking-widest py-3 text-white transition-all duration-300 disabled:opacity-30 disabled:pointer-events-none shadow-[0_0_15px_rgba(99,102,241,0.1)] hover:shadow-[0_0_20px_rgba(99,102,241,0.3)] font-bold uppercase"
+                    className="w-full border border-border-bright bg-border-bright/5 hover:bg-border-bright hover:text-black font-mono text-[10px] tracking-widest py-3.5 text-white transition-all duration-300 disabled:opacity-30 disabled:pointer-events-none shadow-[0_0_15px_rgba(99,102,241,0.1)] hover:shadow-[0_0_20px_rgba(99,102,241,0.3)] font-bold uppercase rounded-xl"
                   >
                     INITIALIZE SCENARIO DECRYPTOR →
                   </button>
@@ -352,7 +346,14 @@ export default function IntakePage() {
       </section>
 
       {/* 3. Capabilities Section */}
-      <section id="features" className="py-24 px-6 md:px-12 border-b border-border-dim/50 max-w-6xl mx-auto w-full space-y-16">
+      <motion.section 
+        id="features" 
+        initial={{ opacity: 0, y: 35 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="py-24 px-6 md:px-12 border-b border-border-dim/50 max-w-6xl mx-auto w-full space-y-16"
+      >
         <div className="text-center space-y-3">
           <span className="font-mono text-[9px] tracking-widest text-accent font-bold uppercase">
             CORE CAPABILITIES
@@ -367,10 +368,7 @@ export default function IntakePage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Card 1 */}
-          <div className="retool-glow-hover border border-border-dim bg-surface/20 p-6 space-y-4 relative">
-            <div className="absolute top-0 left-0 w-2 h-[1px] bg-accent" />
-            <div className="absolute top-0 left-0 w-[1px] h-2 bg-accent" />
-            
+          <div className="retool-glow-hover border border-border-dim bg-surface/20 p-6 space-y-4 relative rounded-2xl">
             <div className="text-accent font-mono text-xs font-bold">[01]</div>
             <h3 className="font-mono text-xs font-bold text-white uppercase tracking-widest">
               Bias Detector
@@ -381,10 +379,7 @@ export default function IntakePage() {
           </div>
 
           {/* Card 2 */}
-          <div className="retool-glow-hover border border-border-dim bg-surface/20 p-6 space-y-4 relative">
-            <div className="absolute top-0 left-0 w-2 h-[1px] bg-border-bright" />
-            <div className="absolute top-0 left-0 w-[1px] h-2 bg-border-bright" />
-            
+          <div className="retool-glow-hover border border-border-dim bg-surface/20 p-6 space-y-4 relative rounded-2xl">
             <div className="text-border-bright font-mono text-xs font-bold">[02]</div>
             <h3 className="font-mono text-xs font-bold text-white uppercase tracking-widest">
               Timeline Forecaster
@@ -395,10 +390,7 @@ export default function IntakePage() {
           </div>
 
           {/* Card 3 */}
-          <div className="retool-glow-hover border border-border-dim bg-surface/20 p-6 space-y-4 relative">
-            <div className="absolute top-0 left-0 w-2 h-[1px] bg-accent" />
-            <div className="absolute top-0 left-0 w-[1px] h-2 bg-accent" />
-            
+          <div className="retool-glow-hover border border-border-dim bg-surface/20 p-6 space-y-4 relative rounded-2xl">
             <div className="text-accent font-mono text-xs font-bold">[03]</div>
             <h3 className="font-mono text-xs font-bold text-white uppercase tracking-widest">
               What-If Sandbox
@@ -408,10 +400,17 @@ export default function IntakePage() {
             </p>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* 4. Interactive Mock Sandbox Section */}
-      <section id="sandbox" className="py-24 px-6 md:px-12 border-b border-border-dim/50 max-w-6xl mx-auto w-full space-y-16">
+      <motion.section 
+        id="sandbox" 
+        initial={{ opacity: 0, y: 35 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="py-24 px-6 md:px-12 border-b border-border-dim/50 max-w-6xl mx-auto w-full space-y-16"
+      >
         <div className="text-center space-y-3">
           <span className="font-mono text-[9px] tracking-widest text-border-bright font-bold uppercase">
             PRODUCT DEMO
@@ -431,14 +430,14 @@ export default function IntakePage() {
               <button
                 key={idx}
                 onClick={() => setActiveMockPath(idx)}
-                className={`w-full border p-4 text-left relative transition-all duration-300 flex flex-col gap-2 ${
+                className={`w-full border p-4 text-left relative transition-all duration-300 flex flex-col gap-2 rounded-xl ${
                   activeMockPath === idx
                     ? "border-border-bright bg-border-bright/5 text-white"
                     : "border-border-dim text-gray-500 hover:border-gray-500 hover:text-white"
                 }`}
               >
                 {activeMockPath === idx && (
-                  <div className="absolute top-0 right-0 w-1.5 h-1.5 bg-border-bright" />
+                  <div className="absolute top-3 right-3 w-1.5 h-1.5 bg-border-bright rounded-full animate-pulse" />
                 )}
                 <span className="text-[10px] font-bold tracking-widest">PATH 0{idx + 1}</span>
                 <span className="font-sans text-xs font-bold text-white uppercase">{p.title}</span>
@@ -447,11 +446,7 @@ export default function IntakePage() {
           </div>
 
           {/* Sandbox Preview Board (3 cols) */}
-          <div className="lg:col-span-3 border border-border-dim bg-surface/30 p-6 space-y-6 relative">
-            {/* Visual accent corner borders */}
-            <div className="absolute top-0 left-0 w-2 h-[1px] bg-accent" />
-            <div className="absolute top-0 left-0 w-[1px] h-2 bg-accent" />
-
+          <div className="lg:col-span-3 border border-border-dim bg-surface/30 p-6 space-y-6 relative rounded-2xl">
             <div className="space-y-1">
               <span className="font-mono text-[9px] text-gray-500 uppercase block">LIVE SIMULATION OUTPUT</span>
               <h3 className="font-sans font-bold text-lg text-white uppercase">{mockPaths[activeMockPath].title}</h3>
@@ -468,9 +463,9 @@ export default function IntakePage() {
                   <span>FINANCIAL STABILITY</span>
                   <span>{mockPaths[activeMockPath].metrics.financial}/10</span>
                 </div>
-                <div className="border border-border-dim h-3 flex p-[1px]">
+                <div className="border border-border-dim h-4 flex p-[2.5px] rounded-full">
                   {Array.from({ length: 10 }).map((_, i) => (
-                    <div key={i} className={`flex-1 h-full mr-[1px] ${i < mockPaths[activeMockPath].metrics.financial ? "bg-accent" : "bg-transparent"}`} />
+                    <div key={i} className={`flex-1 h-full rounded-full mx-[1px] ${i < mockPaths[activeMockPath].metrics.financial ? "bg-accent" : "bg-transparent"}`} />
                   ))}
                 </div>
               </div>
@@ -481,9 +476,9 @@ export default function IntakePage() {
                   <span>PERSONAL GROWTH</span>
                   <span>{mockPaths[activeMockPath].metrics.growth}/10</span>
                 </div>
-                <div className="border border-border-dim h-3 flex p-[1px]">
+                <div className="border border-border-dim h-4 flex p-[2.5px] rounded-full">
                   {Array.from({ length: 10 }).map((_, i) => (
-                    <div key={i} className={`flex-1 h-full mr-[1px] ${i < mockPaths[activeMockPath].metrics.growth ? "bg-accent" : "bg-transparent"}`} />
+                    <div key={i} className={`flex-1 h-full rounded-full mx-[1px] ${i < mockPaths[activeMockPath].metrics.growth ? "bg-accent" : "bg-transparent"}`} />
                   ))}
                 </div>
               </div>
@@ -494,9 +489,9 @@ export default function IntakePage() {
                   <span>RISK LEVEL</span>
                   <span className="text-danger">{mockPaths[activeMockPath].metrics.risk}/10</span>
                 </div>
-                <div className="border border-border-dim h-3 flex p-[1px]">
+                <div className="border border-border-dim h-4 flex p-[2.5px] rounded-full">
                   {Array.from({ length: 10 }).map((_, i) => (
-                    <div key={i} className={`flex-1 h-full mr-[1px] ${i < mockPaths[activeMockPath].metrics.risk ? "bg-danger" : "bg-transparent"}`} />
+                    <div key={i} className={`flex-1 h-full rounded-full mx-[1px] ${i < mockPaths[activeMockPath].metrics.risk ? "bg-danger" : "bg-transparent"}`} />
                   ))}
                 </div>
               </div>
@@ -522,10 +517,17 @@ export default function IntakePage() {
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* 5. Pricing Section */}
-      <section id="pricing" className="py-24 px-6 md:px-12 border-b border-border-dim/50 max-w-6xl mx-auto w-full space-y-16">
+      <motion.section 
+        id="pricing" 
+        initial={{ opacity: 0, y: 35 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="py-24 px-6 md:px-12 border-b border-border-dim/50 max-w-6xl mx-auto w-full space-y-16"
+      >
         <div className="text-center space-y-3">
           <span className="font-mono text-[9px] tracking-widest text-accent font-bold uppercase">
             PRICING PLANS
@@ -540,24 +542,24 @@ export default function IntakePage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono">
           {/* Card 1 */}
-          <div className="border border-border-dim bg-surface/10 p-6 flex flex-col justify-between h-[380px] relative">
+          <div className="border border-border-dim bg-surface/10 p-6 flex flex-col justify-between h-[380px] relative rounded-2xl">
             <div className="space-y-6">
               <div className="space-y-1">
                 <span className="text-[9px] text-gray-500 tracking-wider block uppercase">FREE PLAN</span>
                 <h3 className="font-sans font-bold text-2xl text-white">$0</h3>
               </div>
               <p className="text-gray-400 text-xs font-sans leading-relaxed">
-                Standard dilemma scanner, 3 parallel paths, and integration with local Ollama endpoints out-of-the-box.
+                Standard dilemma dilemma, 3 parallel paths, and integration with local Ollama endpoints out-of-the-box.
               </p>
             </div>
-            <button onClick={focusConsole} className="w-full border border-border-dim py-2.5 text-xs text-gray-400 hover:border-white hover:text-white hover:bg-white/5 transition-all duration-300">
+            <button onClick={focusConsole} className="w-full border border-border-dim py-2.5 text-xs text-gray-400 hover:border-white hover:text-white hover:bg-white/5 transition-all duration-300 rounded-full">
               GET STARTED
             </button>
           </div>
 
           {/* Card 2 */}
-          <div className="border border-border-bright bg-border-bright/5 p-6 flex flex-col justify-between h-[380px] relative">
-            <div className="absolute top-0 right-0 bg-border-bright text-black font-bold px-2 py-0.5 text-[8px] tracking-widest uppercase">
+          <div className="border border-border-bright bg-border-bright/5 p-6 flex flex-col justify-between h-[380px] relative rounded-2xl">
+            <div className="absolute top-3 right-3 bg-border-bright text-black font-bold px-2.5 py-0.5 text-[8px] tracking-widest uppercase rounded-full">
               POPULAR
             </div>
             
@@ -570,13 +572,13 @@ export default function IntakePage() {
                 Includes deeper What-If sandboxes (up to 5 levels), API key overrides for Gemini and OpenAI GPT-4o-mini, and bias summary exports.
               </p>
             </div>
-            <button onClick={focusConsole} className="w-full border border-border-bright bg-border-bright py-2.5 text-xs text-black font-bold hover:opacity-90 transition-opacity">
+            <button onClick={focusConsole} className="w-full border border-border-bright bg-border-bright py-2.5 text-xs text-black font-bold hover:opacity-90 transition-opacity rounded-full">
               UPGRADE NOW
             </button>
           </div>
 
           {/* Card 3 */}
-          <div className="border border-border-dim bg-surface/10 p-6 flex flex-col justify-between h-[380px] relative">
+          <div className="border border-border-dim bg-surface/10 p-6 flex flex-col justify-between h-[380px] relative rounded-2xl">
             <div className="space-y-6">
               <div className="space-y-1">
                 <span className="text-[9px] text-gray-500 tracking-wider block uppercase">ENTERPRISE PLAN</span>
@@ -586,19 +588,19 @@ export default function IntakePage() {
                 Unlimited concurrent session logs, custom model mappings, priority API rate allocations, and dedicated enterprise support.
               </p>
             </div>
-            <button onClick={focusConsole} className="w-full border border-border-dim py-2.5 text-xs text-gray-400 hover:border-white hover:text-white hover:bg-white/5 transition-all duration-300">
+            <button onClick={focusConsole} className="w-full border border-border-dim py-2.5 text-xs text-gray-400 hover:border-white hover:text-white hover:bg-white/5 transition-all duration-300 rounded-full">
               CONTACT SALES
             </button>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* 6. Footer Section */}
       <footer className="bg-bg border-t border-border-dim/80 py-12 px-6 md:px-12 mt-auto font-mono text-[10px] text-gray-500">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-6">
           <div className="flex items-center space-x-2.5">
-            <div className="w-4 h-4 border border-border-bright flex items-center justify-center relative">
-              <div className="w-2 h-2 bg-accent" />
+            <div className="w-4 h-4 border border-border-bright flex items-center justify-center relative rounded-md">
+              <div className="w-2.5 h-2.5 bg-accent rounded-[2px]" />
             </div>
             <span className="tracking-[0.2em] font-bold text-white text-[11px]">
               PATHSMITH

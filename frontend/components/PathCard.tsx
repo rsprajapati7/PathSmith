@@ -14,15 +14,11 @@ export function PathCard({ path, index, parentMetrics }: PathCardProps) {
   const [showWhatIf, setShowWhatIf] = useState(false);
 
   return (
-    <div className="border border-border-dim bg-surface/50 backdrop-blur-md p-6 flex flex-col gap-4 relative transition-all duration-300 hover:border-border-bright/40">
-      {/* Visual cybernetic corner accent lines */}
-      <div className="absolute top-0 left-0 w-2 h-[1px] bg-border-bright" />
-      <div className="absolute top-0 left-0 w-[1px] h-2 bg-border-bright" />
-      <div className="absolute bottom-0 right-0 w-2 h-[1px] bg-border-bright" />
-      <div className="absolute bottom-0 right-0 w-[1px] h-2 bg-border-bright" />
+    <div className="border border-border-dim bg-surface/50 backdrop-blur-md p-6 flex flex-col gap-4 relative transition-all duration-300 hover:border-border-bright/40 rounded-xl">
+
 
       <h2 className="font-mono text-xs tracking-widest text-border-bright flex items-center gap-2">
-        <span className="bg-border-bright/10 text-border-bright px-1.5 py-0.5 text-[9px] font-bold">
+        <span className="bg-border-bright/10 text-border-bright px-2.5 py-0.5 text-[9px] font-bold rounded-full">
           PATH {String(index + 1).padStart(2, "0")}
         </span>
         <span className="truncate uppercase font-bold">{path.title}</span>
@@ -76,7 +72,7 @@ export function PathCard({ path, index, parentMetrics }: PathCardProps) {
       <div className="border-t border-border-dim/60 pt-4 mt-auto">
         <button
           onClick={() => setShowWhatIf((v) => !v)}
-          className={`w-full border px-4 py-2 font-mono text-[10px] tracking-widest transition-all duration-300 ${
+          className={`w-full border px-4 py-2 font-mono text-[10px] tracking-widest transition-all duration-300 rounded-lg ${
             showWhatIf 
               ? "border-accent bg-accent/10 text-accent" 
               : "border-gray-500 text-gray-400 hover:border-white hover:text-white"

@@ -9,13 +9,16 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        bg: "#05050a",
-        surface: "#0e0e15",
-        "border-dim": "#222233",
-        "border-bright": "#6366f1",
-        accent: "#06b6d4",
-        "accent-glow": "#3b82f6",
-        danger: "#f43f5e",
+        bg: "#050b0c",
+        surface: "#0b1516",
+        "border-dim": "#1b2f30",
+        "border-bright": "#A5E9DD", // Mint
+        accent: "#A5E9DD", // Mint
+        "accent-glow": "#34908B", // Deep Ocean
+        sage: "#6FBEB2", // Sage Teal
+        gold: "#FDF4AF", // Gold
+        danger: "#f87171",
+        warning: "#FDF4AF",
       },
       fontFamily: {
         sans: ["Inter", "sans-serif"],
