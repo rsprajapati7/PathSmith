@@ -78,22 +78,22 @@ export default function ClarifyPage() {
           <span className="font-mono text-[9px] tracking-widest text-border-bright font-bold uppercase block">
             SESSION ACTIVE
           </span>
-          <h2 className="font-sans font-bold text-2xl uppercase tracking-tight text-white">
+          <h2 className="font-sans font-bold text-2xl uppercase tracking-tight text-main">
             COGNITIVE BLUEPRINT
           </h2>
         </div>
 
         <div className="space-y-4">
-          <p className="font-mono text-[10px] text-gray-500 tracking-wider uppercase">INPUT DILEMMA</p>
-          <blockquote className="border-l border-accent bg-accent/5 p-4 text-xs leading-relaxed italic text-gray-300 font-mono rounded-r-xl">
+          <p className="font-mono text-[10px] text-muted tracking-wider uppercase font-bold">INPUT DILEMMA</p>
+          <blockquote className="border-l border-accent bg-accent/5 p-4 text-xs leading-relaxed italic text-main font-mono rounded-r-xl">
             &ldquo;{dilemma}&rdquo;
           </blockquote>
         </div>
 
         <div className="space-y-4">
-          <p className="font-mono text-[10px] text-gray-500 tracking-wider uppercase">DETECTED COGNITIVE BIASES</p>
+          <p className="font-mono text-[10px] text-muted tracking-wider uppercase font-bold">DETECTED COGNITIVE BIASES</p>
           {biases.length === 0 ? (
-            <p className="text-xs text-gray-400 font-sans italic">No prominent cognitive biases flagged in session start.</p>
+            <p className="text-xs text-muted font-sans italic">No prominent cognitive biases flagged in session start.</p>
           ) : (
             <ul className="space-y-3">
               {biases.map((b, i) => (
@@ -109,7 +109,7 @@ export default function ClarifyPage() {
                     {b.split(":")[0] || b}
                   </span>
                   {b.includes(":") && (
-                    <span className="text-[11px] text-gray-400 leading-normal">
+                    <span className="text-[11px] text-muted leading-normal">
                       {b.substring(b.indexOf(":") + 1).trim()}
                     </span>
                   )}
@@ -132,10 +132,10 @@ export default function ClarifyPage() {
             <span className="font-mono text-[9px] tracking-widest text-accent font-bold uppercase block">
               INPUT REQUIRED
             </span>
-            <h2 className="font-sans font-bold text-2xl uppercase tracking-tight text-white">
+            <h2 className="font-sans font-bold text-2xl uppercase tracking-tight text-main">
               CLARIFY CONSTRAINTS
             </h2>
-            <p className="text-gray-400 text-xs">
+            <p className="text-muted text-xs">
               Answer the following AI-generated prompts to scope real limits, values, and downside tolerance.
             </p>
           </div>
@@ -147,7 +147,7 @@ export default function ClarifyPage() {
                   <span className="font-mono text-[10px] font-bold text-accent">Q{idx + 1}</span>
                   <span className="h-[1px] w-4 bg-border-dim" />
                 </div>
-                <p className="text-xs md:text-sm text-white font-sans leading-relaxed">{q.text}</p>
+                <p className="text-xs md:text-sm text-main font-sans leading-relaxed">{q.text}</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 pt-1">
                   {q.options.map((opt) => {
                     const isSelected = localAnswers[q.question_id] === opt;
@@ -158,8 +158,8 @@ export default function ClarifyPage() {
                         disabled={loading}
                         className={`border p-3 text-left transition-all duration-300 text-xs font-mono relative rounded-xl ${
                           isSelected
-                            ? "border-accent bg-accent/10 text-white font-bold"
-                            : "border-border-dim hover:border-gray-500 text-gray-400 hover:text-white"
+                            ? "border-accent bg-accent/10 text-main font-bold"
+                            : "border-border-dim hover:border-accent text-muted hover:text-main bg-white"
                         }`}
                       >
                         {isSelected && (
@@ -183,7 +183,7 @@ export default function ClarifyPage() {
               id="generate-paths-button"
               onClick={handleGenerate}
               disabled={!allAnswered}
-              className="w-full border border-accent bg-accent/5 hover:bg-accent hover:text-black font-mono text-xs tracking-widest py-4 text-white transition-all duration-300 disabled:opacity-30 disabled:pointer-events-none shadow-[0_0_15px_rgba(6,182,212,0.05)] hover:shadow-[0_0_20px_rgba(6,182,212,0.2)] font-bold uppercase rounded-xl"
+              className="w-full border border-accent bg-accent/5 hover:bg-accent hover:text-white font-mono text-xs tracking-widest py-4 text-accent transition-all duration-300 disabled:opacity-30 disabled:pointer-events-none shadow-[0_0_15px_rgba(52,144,139,0.05)] hover:shadow-[0_0_20px_rgba(52,144,139,0.15)] font-bold uppercase rounded-xl"
             >
               MODEL FUTURES MATRIX →
             </button>

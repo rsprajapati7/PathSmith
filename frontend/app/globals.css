@@ -9,8 +9,8 @@
 }
 
 body {
-  background-color: #050b0c;
-  color: #f3f4f6;
+  background-color: #FDF4AF;
+  color: #122a2c;
   font-family: "Inter", sans-serif;
   overflow-x: hidden;
 }
@@ -21,10 +21,10 @@ body {
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #050b0c;
+  background: #FDF4AF;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1b2f30;
+  background: #D8CE95;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
@@ -34,32 +34,32 @@ body {
 /* Futuristic Cyber Grid Background */
 .cyber-grid {
   background-image: 
-    linear-gradient(rgba(165, 233, 221, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(165, 233, 221, 0.02) 1px, transparent 1px);
+    linear-gradient(rgba(52, 144, 139, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(52, 144, 139, 0.05) 1px, transparent 1px);
   background-size: 40px 40px;
   background-position: center;
 }
 
 /* Neon glow helper classes */
 .glow-border {
-  box-shadow: 0 0 10px rgba(165, 233, 221, 0.15);
+  box-shadow: 0 4px 20px rgba(52, 144, 139, 0.08);
 }
 
 .glow-border-accent {
-  box-shadow: 0 0 10px rgba(52, 144, 139, 0.2);
+  box-shadow: 0 4px 20px rgba(52, 144, 139, 0.12);
 }
 
 .glow-text-cyan {
-  text-shadow: 0 0 8px rgba(165, 233, 221, 0.5);
+  text-shadow: 0 0 8px rgba(52, 144, 139, 0.15);
 }
 
 .glow-text-indigo {
-  text-shadow: 0 0 8px rgba(165, 233, 221, 0.4);
+  text-shadow: 0 0 8px rgba(52, 144, 139, 0.12);
 }
 
 /* Retool-inspired accent glows */
 .retool-gradient-text {
-  background: linear-gradient(135deg, #FDF4AF 0%, #A5E9DD 50%, #34908B 100%);
+  background: linear-gradient(135deg, #122a2c 0%, #34908B 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -68,8 +68,8 @@ body {
   transition: all 0.3s ease-in-out;
 }
 .retool-glow-hover:hover {
-  box-shadow: 0 0 25px rgba(165, 233, 221, 0.25);
-  border-color: rgba(165, 233, 221, 0.6);
+  box-shadow: 0 10px 30px rgba(52, 144, 139, 0.12);
+  border-color: rgba(52, 144, 139, 0.3);
 }
 
 .glow-btn {

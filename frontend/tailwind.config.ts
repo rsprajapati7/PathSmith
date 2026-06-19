@@ -9,16 +9,18 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        bg: "#050b0c",
-        surface: "#0b1516",
-        "border-dim": "#1b2f30",
-        "border-bright": "#A5E9DD", // Mint
-        accent: "#A5E9DD", // Mint
-        "accent-glow": "#34908B", // Deep Ocean
+        bg: "#FDF4AF", // Gold background
+        surface: "#ffffff", // Pure white card surfaces
+        "border-dim": "#D8CE95", // Warm gold-cream border
+        "border-bright": "#34908B", // Deep Ocean
+        accent: "#34908B", // Deep Ocean
+        "accent-glow": "#6FBEB2", // Sage Teal
         sage: "#6FBEB2", // Sage Teal
         gold: "#FDF4AF", // Gold
-        danger: "#f87171",
-        warning: "#FDF4AF",
+        danger: "#BE123C", // Rose Red
+        warning: "#D97706", // Amber
+        main: "#122a2c", // Deep soothing text color
+        muted: "#4e6a6c", // Muted soothing text color
       },
       fontFamily: {
         sans: ["Inter", "sans-serif"],

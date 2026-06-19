@@ -32,8 +32,8 @@ export function MetricBar({ label, value, previous }: MetricBarProps) {
   return (
     <div className="font-mono text-xs mb-3">
       <div className="flex justify-between mb-1.5 items-center">
-        <span className="text-[10px] tracking-widest text-gray-500 uppercase">{label.toUpperCase()}</span>
-        <span className={`text-[11px] font-bold ${changed ? (decreased ? "text-danger" : "text-accent") : "text-white"}`}>
+        <span className="text-[10px] tracking-widest text-muted uppercase font-bold">{label.toUpperCase()}</span>
+        <span className={`text-[11px] font-bold ${changed ? (decreased ? "text-danger" : "text-accent") : "text-main"}`}>
           {value}/10{deltaText}
         </span>
       </div>

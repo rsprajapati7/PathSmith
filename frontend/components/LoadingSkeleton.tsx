@@ -42,12 +42,12 @@ export function LoadingSkeleton({ rows = 3 }: { rows?: number }) {
           <div className="w-2 h-2 bg-accent rounded-full animate-ping" />
           <span>{MESSAGES[msgIndex]}</span>
         </div>
-        <span className="text-gray-400 font-mono text-[10px] tabular-nums">{progress}%</span>
+        <span className="text-muted font-mono text-[10px] tabular-nums">{progress}%</span>
       </div>
       {Array.from({ length: rows }).map((_, i) => (
         <div 
           key={i} 
-          className="h-5 bg-surface/30 border border-border-dim/40 w-full flex items-center px-4 rounded-full"
+          className="h-5 bg-surface/60 border border-border-dim/40 w-full flex items-center px-4 rounded-full"
           style={{ animationDelay: `${i * 0.15}s` }}
         >
           <div 
