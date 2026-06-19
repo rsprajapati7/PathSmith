@@ -4,10 +4,11 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDecisionStore } from "@/store/decisionStore";
 import { PathCard } from "@/components/PathCard";
+import { RecommendationBanner } from "@/components/RecommendationBanner";
 
 export default function MatrixPage() {
   const router = useRouter();
-  const { paths, dilemma, reset, config, setConfig } = useDecisionStore();
+  const { paths, dilemma, reset, config, setConfig, decisionMode, recommendation } = useDecisionStore();
   const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
@@ -177,10 +178,19 @@ export default function MatrixPage() {
 
       {/* ── PATH GRID ── */}
       <div className="flex-1 p-6 md:p-8">
+        {/* Recommendation Banner */}
+        {recommendation && (
+          <RecommendationBanner recommendation={recommendation} paths={paths} />
+        )}
+
         {/* Summary ribbon */}
         <div className="mb-8 flex items-center gap-3 flex-wrap">
           <span className="font-mono text-[9px] text-muted uppercase tracking-widest font-bold">
             {paths.length} PATH{paths.length !== 1 ? "S" : ""} GENERATED
+          </span>
+          <span className="h-[1px] w-8 bg-border-dim" />
+          <span className="font-mono text-[9px] text-muted uppercase tracking-widest font-bold">
+            {decisionMode === "short_term" ? "⚡ SHORT TERM MODE" : "🔭 LONG TERM MODE"}
           </span>
           <span className="h-[1px] w-8 bg-border-dim" />
           {paths.map((p, i) => {
@@ -214,7 +224,12 @@ export default function MatrixPage() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.5, delay: i * 0.14, ease: "easeOut" }}
             >
-              <PathCard path={path} index={i} />
+              <PathCard
+                path={path}
+                index={i}
+                decisionMode={decisionMode}
+                isRecommended={recommendation?.recommended_path_id === path.path_id}
+              />
             </motion.div>
           ))}
         </motion.div>

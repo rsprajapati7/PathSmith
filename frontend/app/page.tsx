@@ -8,7 +8,7 @@ import { ErrorBlock } from "@/components/ui/ErrorBlock";
 
 export default function IntakePage() {
   const router = useRouter();
-  const { dilemma, setDilemma, setSession, reset, config, setConfig, profileContext, setProfileContext } = useDecisionStore();
+  const { dilemma, setDilemma, setSession, reset, config, setConfig, profileContext, setProfileContext, decisionMode, setDecisionMode } = useDecisionStore();
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -339,6 +339,33 @@ export default function IntakePage() {
               </div>
 
               <div className="p-5 space-y-4">
+                {/* Decision Mode Toggle */}
+                <div className="space-y-2">
+                  <p className="font-mono text-[9px] text-muted uppercase tracking-widest font-bold">Decision Horizon</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {([
+                      { id: "long_term" as const, label: "Long Term Decision", icon: "🔭", desc: "Year 1–5 projections" },
+                      { id: "short_term" as const, label: "Short Term Decision", icon: "⚡", desc: "Next 6–12 months" },
+                    ]).map((mode) => (
+                      <button
+                        key={mode.id}
+                        onClick={() => setDecisionMode(mode.id)}
+                        className={`border p-3 text-left transition-all duration-300 rounded-xl flex flex-col gap-1 group ${
+                          decisionMode === mode.id
+                            ? "border-accent bg-accent/10 text-accent"
+                            : "border-border-dim text-muted hover:border-accent/60 hover:text-main bg-surface"
+                        }`}
+                      >
+                        <span className="text-base leading-none">{mode.icon}</span>
+                        <span className="font-mono text-[9px] font-bold tracking-wider uppercase leading-tight">{mode.label}</span>
+                        <span className={`font-sans text-[9px] leading-tight ${
+                          decisionMode === mode.id ? "text-accent/70" : "text-muted/60"
+                        }`}>{mode.desc}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Textarea */}
                 <div className="relative border border-border-dim bg-bg/40 p-4 rounded-xl focus-within:border-accent transition-colors duration-300">
                   <textarea

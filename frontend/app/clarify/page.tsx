@@ -8,7 +8,7 @@ import { ErrorBlock } from "@/components/ui/ErrorBlock";
 
 export default function ClarifyPage() {
   const router = useRouter();
-  const { dilemma, session_id, biases, questions, answers, setAnswers, setPaths, config, setConfig, profileContext } =
+  const { dilemma, session_id, biases, questions, answers, setAnswers, setPaths, config, setConfig, profileContext, decisionMode, setRecommendation } =
     useDecisionStore();
   const [localAnswers, setLocalAnswers] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -54,6 +54,7 @@ export default function ClarifyPage() {
           answers: localAnswers,
           config,
           profile_context: profileContext || undefined,
+          decision_mode: decisionMode,
         }),
       });
       if (!res.ok) {
@@ -62,6 +63,7 @@ export default function ClarifyPage() {
       }
       const data = await res.json();
       setPaths(data.paths);
+      setRecommendation(data.recommendation ?? null);
       router.push("/matrix");
     } catch (e: any) {
       setError(e.message);

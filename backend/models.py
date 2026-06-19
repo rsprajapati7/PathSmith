@@ -9,6 +9,9 @@ class Metrics(BaseModel):
 
 class Timeline(BaseModel):
     year_1: str
+
+class LongTermTimeline(BaseModel):
+    year_1: str
     year_3: str
     year_5: str
 
@@ -16,9 +19,16 @@ class Path(BaseModel):
     path_id: str
     title: str
     summary: str
+    pros: List[str] = Field(default_factory=list, description="2-3 key advantages of this path")
+    cons: List[str] = Field(default_factory=list, description="2-3 key disadvantages of this path")
     metrics: Metrics
-    timeline: Timeline
+    timeline: LongTermTimeline
     hidden_tradeoffs: List[str]
+
+class Recommendation(BaseModel):
+    recommended_path_id: str = Field(description="The path_id of the single best recommended path")
+    reasoning: str = Field(description="2-4 sentences explaining WHY this path is best for this specific user, comparing all paths and citing their stated constraints. Must not just default to 'balanced'.")
+    key_factors: List[str] = Field(description="2-3 specific decisive factors that make this path win over the others")
 
 class ClarifyingQuestion(BaseModel):
     question_id: str
@@ -32,6 +42,7 @@ class StartSessionResponse(BaseModel):
 
 class GeneratePathsResponse(BaseModel):
     paths: List[Path] = Field(description="Exactly 3 distinct paths generated based on the dilemma and answers")
+    recommendation: Optional[Recommendation] = Field(default=None, description="AI recommendation for the single best path")
 
 class WhatIfResponse(BaseModel):
     original_path_id: str
@@ -58,6 +69,7 @@ class GeneratePathsRequest(BaseModel):
     answers: dict
     config: Optional[LLMConfig] = None
     profile_context: Optional[str] = None
+    decision_mode: str = Field(default="long_term", description="'long_term' or 'short_term'")
 
 class WhatIfRequest(BaseModel):
     session_id: str

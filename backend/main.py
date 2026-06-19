@@ -98,7 +98,7 @@ async def generate_paths(body: GeneratePathsRequest):
     llm_config = body.config.model_dump() if body.config else session.get("config")
     
     try:
-        result = await run_generate_paths(body.dilemma, body.answers, llm_config, body.profile_context)
+        result = await run_generate_paths(body.dilemma, body.answers, llm_config, body.profile_context, body.decision_mode)
     except QuotaExhaustedException as e:
         raise HTTPException(status_code=429, detail=str(e))
     except Exception as e:

@@ -7,7 +7,7 @@ export interface Metrics {
   time_commitment: number;
 }
 
-export interface Timeline {
+export interface LongTermTimeline {
   year_1: string;
   year_3: string;
   year_5: string;
@@ -17,9 +17,17 @@ export interface Path {
   path_id: string;
   title: string;
   summary: string;
+  pros?: string[];
+  cons?: string[];
   metrics: Metrics;
-  timeline: Timeline;
+  timeline: LongTermTimeline;
   hidden_tradeoffs: string[];
+}
+
+export interface Recommendation {
+  recommended_path_id: string;
+  reasoning: string;
+  key_factors: string[];
 }
 
 export interface ClarifyingQuestion {
@@ -36,6 +44,8 @@ export interface LLMConfig {
   model_powerful?: string;
 }
 
+export type DecisionMode = "long_term" | "short_term";
+
 interface DecisionStore {
   dilemma: string;
   session_id: string;
@@ -46,6 +56,8 @@ interface DecisionStore {
   branches: Record<string, Path[]>;   // path_id → child paths
   config: LLMConfig;
   profileContext: string;
+  decisionMode: DecisionMode;
+  recommendation: Recommendation | null;
   setDilemma: (d: string) => void;
   setSession: (id: string, biases: string[], questions: ClarifyingQuestion[]) => void;
   setAnswers: (a: Record<string, string>) => void;
@@ -53,6 +65,8 @@ interface DecisionStore {
   addBranch: (parentId: string, child: Path) => void;
   setConfig: (cfg: Partial<LLMConfig>) => void;
   setProfileContext: (text: string) => void;
+  setDecisionMode: (mode: DecisionMode) => void;
+  setRecommendation: (r: Recommendation | null) => void;
   reset: () => void;
 }
 
@@ -86,6 +100,8 @@ export const useDecisionStore = create<DecisionStore>((set) => ({
   branches: {},
   config: getInitialConfig(),
   profileContext: "",
+  decisionMode: "long_term",
+  recommendation: null,
   setDilemma: (d) => set({ dilemma: d }),
   setSession: (id, biases, questions) => set({ session_id: id, biases, questions }),
   setAnswers: (a) => set({ answers: a }),
@@ -106,6 +122,8 @@ export const useDecisionStore = create<DecisionStore>((set) => ({
       return { config: newConfig };
     }),
   setProfileContext: (text) => set({ profileContext: text }),
+  setDecisionMode: (mode) => set({ decisionMode: mode }),
+  setRecommendation: (r) => set({ recommendation: r }),
   reset: () =>
     set((state) => ({
       dilemma: "",
@@ -116,7 +134,9 @@ export const useDecisionStore = create<DecisionStore>((set) => ({
       paths: [],
       branches: {},
       profileContext: "",
-      // Keep configuration persistent across sessions
+      recommendation: null,
+      // Keep configuration and decision mode persistent across sessions
       config: state.config,
+      decisionMode: state.decisionMode,
     })),
 }));
