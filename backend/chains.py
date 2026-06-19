@@ -56,60 +56,110 @@ def get_llm(config: Optional[dict], is_powerful: bool, temperature: float = 0.3)
     else:
         raise ValueError(f"Unsupported LLM provider: {provider}")
 
+class QuotaExhaustedException(Exception):
+    pass
+
 @retry(
     retry=retry_if_exception_type((ValidationError, ValueError)),
     stop=stop_after_attempt(3),
     wait=wait_exponential(multiplier=1, min=2, max=8),
 )
+async def _invoke_start_session(dilemma: str, config: Optional[dict] = None) -> StartSessionResponse:
+    llm = get_llm(config, is_powerful=False)
+    structured_llm = llm.with_structured_output(StartSessionResponse)
+    prompt = ChatPromptTemplate.from_template(START_SESSION_PROMPT)
+    chain = prompt | structured_llm
+    return await chain.ainvoke({"dilemma": dilemma})
+
+@retry(
+    retry=retry_if_exception_type((ValidationError, ValueError)),
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=8),
+)
+async def _invoke_generate_paths(dilemma: str, answers: dict, config: Optional[dict] = None) -> GeneratePathsResponse:
+    llm = get_llm(config, is_powerful=False)
+    structured_llm = llm.with_structured_output(GeneratePathsResponse)
+    prompt = ChatPromptTemplate.from_template(GENERATE_PATHS_PROMPT)
+    chain = prompt | structured_llm
+    return await chain.ainvoke({"dilemma": dilemma, "answers": str(answers)})
+
+@retry(
+    retry=retry_if_exception_type((ValidationError, ValueError)),
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=8),
+)
+async def _invoke_what_if(original_path, what_if_scenario: str, config: Optional[dict] = None) -> Path:
+    llm = get_llm(config, is_powerful=True)
+    structured_llm = llm.with_structured_output(Path)
+    prompt = ChatPromptTemplate.from_template(WHAT_IF_PROMPT)
+    chain = prompt | structured_llm
+    return await chain.ainvoke({
+        "original_path": original_path.model_dump_json(),
+        "what_if_scenario": what_if_scenario,
+    })
+
 async def run_start_session(dilemma: str, config: Optional[dict] = None) -> StartSessionResponse:
     print(f"[run_start_session] Starting with config: {config}")
     try:
-        llm = get_llm(config, is_powerful=False)
-        structured_llm = llm.with_structured_output(StartSessionResponse)
-        prompt = ChatPromptTemplate.from_template(START_SESSION_PROMPT)
-        chain = prompt | structured_llm
-        res = await chain.ainvoke({"dilemma": dilemma})
+        res = await _invoke_start_session(dilemma, config)
         print(f"[run_start_session] Success: {res}")
         return res
     except Exception as e:
+        error_msg = str(e).upper()
+        if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg or "QUOTA" in error_msg:
+            current_model = config.get("model_fast") if config else None
+            if current_model != "gemma-4-31b-it":
+                print("[run_start_session] Quota exhausted! Falling back to gemma-4-31b-it automatically...")
+                fallback_config = dict(config) if config else {}
+                fallback_config["model_fast"] = "gemma-4-31b-it"
+                fallback_config["model_powerful"] = "gemma-4-31b-it"
+                try:
+                    res = await _invoke_start_session(dilemma, fallback_config)
+                    print(f"[run_start_session] Success (fallback): {res}")
+                    return res
+                except Exception as fallback_err:
+                    e = fallback_err
+            
+            raise QuotaExhaustedException(
+                "API call quota limit reached. We cannot proceed further. "
+                "Please change your API key / model parameters, or try again later."
+            )
         print(f"[run_start_session] Error: {e}")
         raise e
 
-@retry(
-    retry=retry_if_exception_type((ValidationError, ValueError)),
-    stop=stop_after_attempt(3),
-    wait=wait_exponential(multiplier=1, min=2, max=8),
-)
 async def run_generate_paths(dilemma: str, answers: dict, config: Optional[dict] = None) -> GeneratePathsResponse:
     print(f"[run_generate_paths] Starting with config: {config}")
     try:
-        llm = get_llm(config, is_powerful=False)
-        structured_llm = llm.with_structured_output(GeneratePathsResponse)
-        prompt = ChatPromptTemplate.from_template(GENERATE_PATHS_PROMPT)
-        chain = prompt | structured_llm
-        res = await chain.ainvoke({"dilemma": dilemma, "answers": str(answers)})
+        res = await _invoke_generate_paths(dilemma, answers, config)
         print(f"[run_generate_paths] Success: {res}")
         return res
     except Exception as e:
+        error_msg = str(e).upper()
+        if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg or "QUOTA" in error_msg:
+            current_model = config.get("model_fast") if config else None
+            if current_model != "gemma-4-31b-it":
+                print("[run_generate_paths] Quota exhausted! Falling back to gemma-4-31b-it automatically...")
+                fallback_config = dict(config) if config else {}
+                fallback_config["model_fast"] = "gemma-4-31b-it"
+                fallback_config["model_powerful"] = "gemma-4-31b-it"
+                try:
+                    res = await _invoke_generate_paths(dilemma, answers, fallback_config)
+                    print(f"[run_generate_paths] Success (fallback): {res}")
+                    return res
+                except Exception as fallback_err:
+                    e = fallback_err
+            
+            raise QuotaExhaustedException(
+                "API call quota limit reached. We cannot proceed further. "
+                "Please change your API key / model parameters, or try again later."
+            )
         print(f"[run_generate_paths] Error: {e}")
         raise e
 
-@retry(
-    retry=retry_if_exception_type((ValidationError, ValueError)),
-    stop=stop_after_attempt(3),
-    wait=wait_exponential(multiplier=1, min=2, max=8),
-)
 async def run_what_if(original_path, what_if_scenario: str, config: Optional[dict] = None) -> WhatIfResponse:
     print(f"[run_what_if] Starting with config: {config}")
     try:
-        llm = get_llm(config, is_powerful=True)
-        structured_llm = llm.with_structured_output(Path)
-        prompt = ChatPromptTemplate.from_template(WHAT_IF_PROMPT)
-        chain = prompt | structured_llm
-        modified_path = await chain.ainvoke({
-            "original_path": original_path.model_dump_json(),
-            "what_if_scenario": what_if_scenario,
-        })
+        modified_path = await _invoke_what_if(original_path, what_if_scenario, config)
         res = WhatIfResponse(
             original_path_id=original_path.path_id,
             what_if_scenario=what_if_scenario,
@@ -118,5 +168,29 @@ async def run_what_if(original_path, what_if_scenario: str, config: Optional[dic
         print(f"[run_what_if] Success: {res}")
         return res
     except Exception as e:
+        error_msg = str(e).upper()
+        if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg or "QUOTA" in error_msg:
+            current_model = config.get("model_powerful") if config else None
+            if current_model != "gemma-4-31b-it":
+                print("[run_what_if] Quota exhausted! Falling back to gemma-4-31b-it automatically...")
+                fallback_config = dict(config) if config else {}
+                fallback_config["model_fast"] = "gemma-4-31b-it"
+                fallback_config["model_powerful"] = "gemma-4-31b-it"
+                try:
+                    modified_path = await _invoke_what_if(original_path, what_if_scenario, fallback_config)
+                    res = WhatIfResponse(
+                        original_path_id=original_path.path_id,
+                        what_if_scenario=what_if_scenario,
+                        modified_path=modified_path
+                    )
+                    print(f"[run_what_if] Success (fallback): {res}")
+                    return res
+                except Exception as fallback_err:
+                    e = fallback_err
+            
+            raise QuotaExhaustedException(
+                "API call quota limit reached. We cannot proceed further. "
+                "Please change your API key / model parameters, or try again later."
+            )
         print(f"[run_what_if] Error: {e}")
         raise e
