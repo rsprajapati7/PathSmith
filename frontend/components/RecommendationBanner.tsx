@@ -1,0 +1,121 @@
+"use client";
+import React from "react";
+import { motion } from "framer-motion";
+import { Recommendation, Path } from "@/store/decisionStore";
+
+interface RecommendationBannerProps {
+  recommendation: Recommendation;
+  paths: Path[];
+}
+
+const PATH_COLORS = ["#34908B", "#4A7FC1", "#7C5CBF"];
+
+export function RecommendationBanner({ recommendation, paths }: RecommendationBannerProps) {
+  const recommendedPath = paths.find((p) => p.path_id === recommendation.recommended_path_id);
+  const pathIndex = paths.findIndex((p) => p.path_id === recommendation.recommended_path_id);
+  const accentColor = PATH_COLORS[pathIndex >= 0 ? pathIndex : 0] || "#34908B";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -16, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.55, ease: "easeOut", delay: 0.1 }}
+      className="relative mb-8 rounded-2xl overflow-hidden"
+      style={{
+        background: `linear-gradient(135deg, ${accentColor}12 0%, ${accentColor}06 50%, transparent 100%)`,
+        border: `1px solid ${accentColor}35`,
+        boxShadow: `0 4px 32px ${accentColor}15, 0 0 0 1px ${accentColor}12`,
+      }}
+    >
+      {/* Top accent bar */}
+      <div
+        className="absolute top-0 left-0 right-0 h-[2.5px]"
+        style={{ background: `linear-gradient(to right, ${accentColor}, ${accentColor}50, transparent)` }}
+      />
+
+      <div className="p-5 md:p-7 space-y-5">
+        {/* Header row */}
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+          <div className="flex items-center gap-3">
+            {/* Star icon */}
+            <div
+              className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-lg font-bold"
+              style={{ background: `${accentColor}18`, border: `1px solid ${accentColor}30`, color: accentColor }}
+            >
+              ✦
+            </div>
+            <div>
+              <span
+                className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] block mb-0.5"
+                style={{ color: accentColor }}
+              >
+                AI RECOMMENDATION
+              </span>
+              <h3 className="font-mono text-sm font-bold text-main uppercase tracking-wide">
+                {recommendedPath?.title ?? recommendation.recommended_path_id}
+              </h3>
+            </div>
+          </div>
+
+          {/* Badge */}
+          <div
+            className="shrink-0 self-start sm:self-center font-mono text-[9px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border flex items-center gap-1.5"
+            style={{
+              color: accentColor,
+              borderColor: `${accentColor}40`,
+              background: `${accentColor}10`,
+            }}
+          >
+            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: accentColor }} />
+            Best Fit For You
+          </div>
+        </div>
+
+        {/* Reasoning */}
+        <div className="space-y-2">
+          <p className="font-mono text-[9px] text-muted uppercase tracking-widest font-bold flex items-center gap-2">
+            <span className="w-1 h-3 rounded-full" style={{ background: accentColor }} />
+            WHY THIS PATH
+          </p>
+          <p className="text-sm text-main font-sans leading-relaxed pl-3">
+            {recommendation.reasoning}
+          </p>
+        </div>
+
+        {/* Key Factors */}
+        {recommendation.key_factors && recommendation.key_factors.length > 0 && (
+          <div className="space-y-2.5 border-t pt-4" style={{ borderColor: `${accentColor}20` }}>
+            <p className="font-mono text-[9px] text-muted uppercase tracking-widest font-bold flex items-center gap-2">
+              <span className="w-1 h-3 rounded-full" style={{ background: accentColor }} />
+              DECISIVE FACTORS
+            </p>
+            <ul className="space-y-2 pl-3">
+              {recommendation.key_factors.map((factor, i) => (
+                <motion.li
+                  key={i}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 + i * 0.08, duration: 0.35 }}
+                  className="flex items-start gap-2.5 text-xs font-sans text-muted leading-relaxed"
+                >
+                  <span
+                    className="font-mono font-bold text-[10px] shrink-0 mt-[1px]"
+                    style={{ color: accentColor }}
+                  >
+                    [{String(i + 1).padStart(2, "0")}]
+                  </span>
+                  {factor}
+                </motion.li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Disclaimer */}
+        <p className="font-mono text-[8px] text-muted/50 tracking-wider pt-1 border-t" style={{ borderColor: `${accentColor}15` }}>
+          This recommendation is generated by AI based on your stated constraints and answers. Use your own judgment before making any major decision.
+        </p>
+      </div>
+    </motion.div>
+  );
+}

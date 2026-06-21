@@ -1,0 +1,302 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   BASE RESET
+   ============================================================ */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background-color: #FDF4AF;
+  overflow-x: hidden;
+}
+
+body {
+  background-color: #FDF4AF;
+  color: #122a2c;
+  font-family: "Inter", sans-serif;
+  overflow-x: hidden;
+}
+
+/* ============================================================
+   CUSTOM SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F5ECA0;
+}
+::-webkit-scrollbar-thumb {
+  background: #C8BE85;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #34908B;
+}
+
+/* ============================================================
+   KEYFRAME ANIMATIONS
+   ============================================================ */
+@keyframes float {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50% { transform: translateY(-18px) scale(1.02); }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px) translateX(0px); }
+  33% { transform: translateY(-10px) translateX(6px); }
+  66% { transform: translateY(6px) translateX(-4px); }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes bar-fill {
+  from { transform: scaleX(0); opacity: 0; }
+  to { transform: scaleX(1); opacity: 1; }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+@keyframes gradient-drift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+@keyframes ping-slow {
+  0% { transform: scale(1); opacity: 0.8; }
+  75%, 100% { transform: scale(2.2); opacity: 0; }
+}
+
+@keyframes scan-line {
+  0% { transform: translateY(-100%); opacity: 0; }
+  10% { opacity: 0.5; }
+  90% { opacity: 0.5; }
+  100% { transform: translateY(400%); opacity: 0; }
+}
+
+@keyframes metric-fill {
+  0% { width: 0; opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* ============================================================
+   ANIMATION UTILITY CLASSES
+   ============================================================ */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float-slow 9s ease-in-out infinite;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out both;
+}
+
+.animate-shake {
+  animation: shake 0.45s ease-in-out;
+}
+
+.animate-ping-slow {
+  animation: ping-slow 2.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.animate-scan-line {
+  animation: scan-line 3s linear infinite;
+}
+
+/* ============================================================
+   FUTURISTIC CYBER GRID BACKGROUND
+   ============================================================ */
+.cyber-grid {
+  background-image:
+    linear-gradient(rgba(52, 144, 139, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(52, 144, 139, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: center;
+}
+
+/* ============================================================
+   GLASSMORPHISM
+   ============================================================ */
+.glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(216, 206, 149, 0.6);
+}
+
+.glass-surface {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ============================================================
+   GLOW HELPERS
+   ============================================================ */
+.glow-border {
+  box-shadow: 0 4px 20px rgba(52, 144, 139, 0.08);
+}
+
+.glow-border-accent {
+  box-shadow: 0 4px 20px rgba(52, 144, 139, 0.14),
+              inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.glow-text-cyan {
+  text-shadow: 0 0 12px rgba(52, 144, 139, 0.2);
+}
+
+.glow-text-indigo {
+  text-shadow: 0 0 8px rgba(52, 144, 139, 0.12);
+}
+
+/* ============================================================
+   GRADIENT TEXT
+   ============================================================ */
+.retool-gradient-text {
+  background: linear-gradient(135deg, #122a2c 0%, #34908B 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.accent-gradient-text {
+  background: linear-gradient(135deg, #34908B 0%, #6FBEB2 50%, #34908B 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s linear infinite;
+}
+
+/* ============================================================
+   HOVER CARD EFFECTS
+   ============================================================ */
+.retool-glow-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.retool-glow-hover:hover {
+  box-shadow: 0 12px 40px rgba(52, 144, 139, 0.14),
+              0 4px 12px rgba(52, 144, 139, 0.08);
+  border-color: rgba(52, 144, 139, 0.35) !important;
+  transform: translateY(-2px);
+}
+
+/* ============================================================
+   SHIMMER BUTTON
+   ============================================================ */
+.glow-btn {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.glow-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -70%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.22) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-25deg);
+  transition: 0.6s;
+}
+.glow-btn:hover::after {
+  left: 130%;
+}
+
+/* ============================================================
+   METRIC BAR SEGMENTS — Animated Fill
+   ============================================================ */
+.metric-seg {
+  transition: background-color 0.3s ease;
+}
+.metric-seg-active {
+  animation: fade-in-up 0.4s ease both;
+}
+
+/* ============================================================
+   PAGE TRANSITION WRAPPER
+   ============================================================ */
+.page-enter {
+  animation: fade-in-up 0.45s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* ============================================================
+   PROGRESS BAR TRACK
+   ============================================================ */
+.progress-track {
+  background: linear-gradient(to right, #34908B var(--progress), #D8CE95 var(--progress));
+  transition: --progress 0.5s ease;
+}
+
+/* ============================================================
+   CARD ACCENT STRIPES
+   ============================================================ */
+.path-stripe-0 { border-left: 3px solid #34908B; }
+.path-stripe-1 { border-left: 3px solid #4A7FC1; }
+.path-stripe-2 { border-left: 3px solid #7C5CBF; }
+
+/* ============================================================
+   TOOLTIP
+   ============================================================ */
+.tooltip {
+  position: relative;
+}
+.tooltip::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #122a2c;
+  color: #FDF4AF;
+  font-size: 9px;
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.tooltip:hover::after {
+  opacity: 1;
+}
