@@ -153,7 +153,7 @@ export function WizardPanel({ onComplete, onCancel }: WizardPanelProps) {
                 What options are you considering?
               </p>
               <p className="text-[10px] text-muted font-sans">
-                Enter at least 2 specific paths or choices you're weighing up.
+                {"Enter at least 2 specific paths or choices you're weighing up."}
               </p>
               <div className="space-y-2">
                 {options.map((opt, i) => (

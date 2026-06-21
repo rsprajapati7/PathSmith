@@ -817,7 +817,7 @@ export default function IntakePage() {
                 <span className="font-mono tracking-[0.2em] font-bold text-main text-sm">PATHSMITH</span>
               </div>
               <p className="text-muted text-xs leading-relaxed font-sans max-w-xs">
-                AI-powered help for life's biggest decisions — explore your options, spot blind spots, and move forward with clarity.
+                {"AI-powered help for life's biggest decisions — explore your options, spot blind spots, and move forward with clarity."}
               </p>
             </div>
 

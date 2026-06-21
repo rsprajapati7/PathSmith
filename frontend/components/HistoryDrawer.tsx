@@ -93,7 +93,7 @@ export function HistoryDrawer({ isOpen, onClose }: HistoryDrawerProps) {
                       No saved simulations
                     </p>
                     <p className="text-[11px] text-muted/60 font-sans leading-relaxed max-w-[200px]">
-                      After running a simulation, click "Save" in the matrix page header.
+                      {"After running a simulation, click \"Save\" in the matrix page header."}
                     </p>
                   </div>
                 </div>
