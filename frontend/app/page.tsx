@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useDecisionStore } from "@/store/decisionStore";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import { ErrorBlock } from "@/components/ui/ErrorBlock";
+import { HistoryDrawer } from "@/components/HistoryDrawer";
+import { WizardPanel } from "@/components/WizardPanel";
 
 export default function IntakePage() {
   const router = useRouter();
@@ -16,6 +18,8 @@ export default function IntakePage() {
   const [showSettings, setShowSettings] = useState(false);
   const [started, setStarted] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [wizardMode, setWizardMode] = useState(false);
 
   // File Upload State
   const [uploading, setUploading] = useState(false);
@@ -176,19 +180,19 @@ export default function IntakePage() {
     {
       num: "01",
       title: "Bias Detector",
-      desc: "Analyzes your dilemma query instantly to identify cognitive distortions like loss aversion, sunk cost fallacies, or status quo biases.",
+      desc: "Before you decide, PathSmith checks if your thinking is being influenced by common mental traps — like fear of losing what you have, or sticking with something just because you've already invested time in it.",
       icon: "🧠",
     },
     {
       num: "02",
-      title: "Timeline Forecaster",
-      desc: "Projects Year 1, Year 3, and Year 5 metrics along three distinct pathways, evaluating wealth options and hidden trade-offs.",
+      title: "Future Timeline",
+      desc: "See what each path could look like 1, 3, and 5 years from now — covering money, growth, risk, and time — so you can compare your options side by side.",
       icon: "📈",
     },
     {
       num: "03",
-      title: "What-If Sandbox",
-      desc: "Enables sandbox branching to adjust variables dynamically, recalculating outcomes up to 2 nodes deep with full metric analysis.",
+      title: "What-If Explorer",
+      desc: "Change the variables and instantly see how your outcomes shift. Ask \"What if I waited 6 months?\" or \"What if I had more savings?\" and get updated results right away.",
       icon: "🔀",
     },
   ];
@@ -230,6 +234,13 @@ export default function IntakePage() {
               </span>
             </div>
           )}
+          {/* History button */}
+          <button
+            onClick={() => setShowHistory(true)}
+            className="hidden sm:flex items-center gap-1.5 font-mono text-[10px] tracking-wider text-muted hover:text-accent border border-border-dim hover:border-accent px-3 py-2 rounded-full font-bold uppercase transition-all duration-200"
+          >
+            📋 History
+          </button>
           <button
             onClick={focusConsole}
             className="glow-btn border-2 border-accent bg-accent text-white font-mono text-[10px] tracking-[0.18em] px-5 py-2.5 transition-all duration-300 font-bold uppercase rounded-full hover:shadow-lg hover:shadow-accent/25 hover:scale-[1.04] active:scale-95"
@@ -275,7 +286,7 @@ export default function IntakePage() {
               transition={{ duration: 0.75, delay: 0.25 }}
               className="text-muted text-sm sm:text-base max-w-xl mx-auto leading-relaxed font-sans font-medium"
             >
-              Scan cognitive fallacies, clarify constraint metrics, and chart branching futures before committing to any major life decision.
+              Stuck at a crossroads? Describe your situation and let AI map out your options, spot blind spots, and show you what each path could look like — before you commit.
             </motion.p>
           </div>
 
@@ -341,7 +352,7 @@ export default function IntakePage() {
               <div className="p-5 space-y-4">
                 {/* Decision Mode Toggle */}
                 <div className="space-y-2">
-                  <p className="font-mono text-[9px] text-muted uppercase tracking-widest font-bold">Decision Horizon</p>
+                  <p className="font-mono text-[9px] text-muted uppercase tracking-widest font-bold">How far ahead are you planning?</p>
                   <div className="grid grid-cols-2 gap-2">
                     {([
                       { id: "long_term" as const, label: "Long Term Decision", icon: "🔭", desc: "Year 1–5 projections" },
@@ -366,24 +377,68 @@ export default function IntakePage() {
                   </div>
                 </div>
 
-                {/* Textarea */}
-                <div className="relative border border-border-dim bg-bg/40 p-4 rounded-xl focus-within:border-accent transition-colors duration-300">
-                  <textarea
-                    id="dilemma-textarea"
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    placeholder="I am trying to decide whether to leave my corporate engineering job to start a boutique coffee shop, or accept a promotion that requires relocating to another country..."
-                    rows={4}
-                    disabled={loading}
-                    className="w-full bg-transparent p-0 text-sm resize-none focus:outline-none text-main placeholder-muted/50 font-sans leading-relaxed"
-                    onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleSubmit(); }}
-                  />
-                  <div className="absolute bottom-3 right-3 flex items-center gap-2">
-                    <span className="font-mono text-[9px] text-muted/60 select-none">
-                      {text.length > 0 ? `${text.length} chars` : "Ctrl+Enter to submit"}
-                    </span>
-                  </div>
+                {/* Input Mode Toggle: Free Text vs. Guided Wizard */}
+                <div className="flex items-center justify-between">
+                  <p className="font-mono text-[9px] text-muted uppercase tracking-widest font-bold">How do you want to describe your situation?</p>
+                  <button
+                    onClick={() => { setWizardMode((v) => !v); setText(""); }}
+                    className={`font-mono text-[8px] font-bold uppercase tracking-widest border px-3 py-1.5 rounded-lg transition-all duration-200 ${
+                      wizardMode
+                        ? "border-accent bg-accent/10 text-accent"
+                        : "border-border-dim text-muted hover:border-accent hover:text-accent"
+                    }`}
+                  >
+                    {wizardMode ? "✏ Type it myself" : "🧭 Answer questions instead"}
+                  </button>
                 </div>
+
+                {/* Wizard or Textarea */}
+                <AnimatePresence mode="wait">
+                  {wizardMode ? (
+                    <motion.div
+                      key="wizard"
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <WizardPanel
+                        onComplete={(assembled) => {
+                          setText(assembled);
+                          setWizardMode(false);
+                        }}
+                        onCancel={() => setWizardMode(false)}
+                      />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="textarea"
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      {/* Textarea */}
+                      <div className="relative border border-border-dim bg-bg/40 p-4 rounded-xl focus-within:border-accent transition-colors duration-300">
+                        <textarea
+                          id="dilemma-textarea"
+                          value={text}
+                          onChange={(e) => setText(e.target.value)}
+                          placeholder="I am trying to decide whether to leave my corporate engineering job to start a boutique coffee shop, or accept a promotion that requires relocating to another country..."
+                          rows={4}
+                          disabled={loading}
+                          className="w-full bg-transparent p-0 text-sm resize-none focus:outline-none text-main placeholder-muted/50 font-sans leading-relaxed"
+                          onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleSubmit(); }}
+                        />
+                        <div className="absolute bottom-3 right-3 flex items-center gap-2">
+                          <span className="font-mono text-[9px] text-muted/60 select-none">
+                            {text.length > 0 ? `${text.length} chars` : "Ctrl+Enter to submit"}
+                          </span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 {/* RAG Document Uploader */}
                 <div
@@ -405,10 +460,10 @@ export default function IntakePage() {
                       </div>
                       <div className="text-left">
                         <p className="text-[10px] font-mono font-bold text-main uppercase tracking-wider">
-                          Profile Grounding (RAG)
+                          Upload Your Background (Optional)
                         </p>
                         <p className="text-[9px] text-muted leading-relaxed">
-                          {isDragOver ? "Drop your file here!" : "Upload resume or transcript (.pdf, .txt) to personalize paths"}
+                          {isDragOver ? "Drop your file here!" : "Add your resume or notes (.pdf, .txt) to get more personalized path suggestions"}
                         </p>
                       </div>
                     </div>
@@ -460,7 +515,7 @@ export default function IntakePage() {
                       className="overflow-hidden"
                     >
                       <div className="border border-border-dim/60 bg-bg/30 rounded-xl p-4 space-y-4 font-mono text-[10px] text-muted">
-                        <p className="text-[9px] uppercase tracking-widest font-bold text-muted/70">⚙ LLM Configuration</p>
+                        <p className="text-[9px] uppercase tracking-widest font-bold text-muted/70">⚙ AI Settings</p>
 
                         {/* Provider Selector */}
                         <div className="space-y-2">
@@ -542,21 +597,23 @@ export default function IntakePage() {
                   )}
                 </AnimatePresence>
 
-                {/* Submit */}
-                <div className="pt-1">
-                  {loading ? (
-                    <LoadingSkeleton rows={2} />
-                  ) : (
-                    <button
-                      id="analyse-button"
-                      onClick={handleSubmit}
-                      disabled={!text.trim()}
-                      className="glow-btn w-full border-2 border-accent bg-accent text-white font-mono text-[10px] tracking-widest py-4 transition-all duration-300 disabled:opacity-30 disabled:pointer-events-none hover:shadow-lg hover:shadow-accent/25 font-bold uppercase rounded-xl hover:scale-[1.01] active:scale-[0.99]"
-                    >
-                      Analyse My Dilemma →
-                    </button>
+                  {/* Submit — only show when not in wizard mode */}
+                  {!wizardMode && (
+                    <div className="pt-1">
+                      {loading ? (
+                        <LoadingSkeleton rows={2} />
+                      ) : (
+                        <button
+                          id="analyse-button"
+                          onClick={handleSubmit}
+                          disabled={!text.trim()}
+                          className="glow-btn w-full border-2 border-accent bg-accent text-white font-mono text-[10px] tracking-widest py-4 transition-all duration-300 disabled:opacity-30 disabled:pointer-events-none hover:shadow-lg hover:shadow-accent/25 font-bold uppercase rounded-xl hover:scale-[1.01] active:scale-[0.99]"
+                        >
+                          Show Me My Options →
+                        </button>
+                      )}
+                    </div>
                   )}
-                </div>
 
                 {error && <ErrorBlock message={error} />}
               </div>
@@ -576,13 +633,13 @@ export default function IntakePage() {
       >
         <div className="text-center space-y-4">
           <span className="inline-block font-mono text-[9px] tracking-widest text-accent font-bold uppercase border border-accent/30 bg-accent/5 px-4 py-1.5 rounded-full">
-            CORE CAPABILITIES
+            HOW IT HELPS
           </span>
           <h2 className="font-sans font-bold text-3xl sm:text-4xl uppercase tracking-tight text-main">
-            Unified Engine for Future Paths
+            Everything You Need to Decide with Confidence
           </h2>
           <p className="text-muted text-sm max-w-lg mx-auto font-medium leading-relaxed">
-            PathSmith combines cognitive psychology with LLM modeling layers to stress-test pathways in a sandbox before you commit.
+            PathSmith uses AI to think through your situation from every angle — helping you see the full picture before making a big move.
           </p>
         </div>
 
@@ -623,13 +680,13 @@ export default function IntakePage() {
       >
         <div className="text-center space-y-4">
           <span className="inline-block font-mono text-[9px] tracking-widest text-accent font-bold uppercase border border-accent/30 bg-accent/5 px-4 py-1.5 rounded-full">
-            PRODUCT DEMO
+            SEE IT IN ACTION
           </span>
           <h2 className="font-sans font-bold text-3xl sm:text-4xl uppercase tracking-tight text-main">
-            Interactive Mock Sandbox
+            A Live Example — Try It Yourself
           </h2>
           <p className="text-muted text-sm max-w-md mx-auto font-medium">
-            Toggle between sample scenarios to preview how PathSmith quantifies and diagrams life outcomes.
+            Click through these real career scenarios to see exactly how PathSmith breaks down each option with scores and a year-by-year forecast.
           </p>
         </div>
 
@@ -685,7 +742,7 @@ export default function IntakePage() {
                 className="space-y-6"
               >
                 <div className="space-y-1.5">
-                  <span className="font-mono text-[9px] text-muted uppercase font-bold block">LIVE SIMULATION OUTPUT</span>
+                  <span className="font-mono text-[9px] text-muted uppercase font-bold block">PATH OVERVIEW</span>
                   <h3 className="font-sans font-bold text-xl text-main uppercase tracking-tight" style={{ color: activePath.color }}>
                     {activePath.title}
                   </h3>
@@ -694,7 +751,7 @@ export default function IntakePage() {
 
                 {/* Metrics */}
                 <div className="border-t border-border-dim/40 pt-5 space-y-3 font-mono text-[10px]">
-                  <span className="text-muted uppercase tracking-widest text-[9px] block font-bold">SIMULATION METRICS</span>
+                  <span className="text-muted uppercase tracking-widest text-[9px] block font-bold">SCORES (out of 10)</span>
 
                   {[
                     { label: "FINANCIAL STABILITY", value: activePath.metrics.financial, colorOverride: "" },
@@ -725,7 +782,7 @@ export default function IntakePage() {
 
                 {/* Timeline */}
                 <div className="border-t border-border-dim/40 pt-5 font-mono">
-                  <span className="text-muted uppercase tracking-widest text-[9px] block mb-4 font-bold">TIMELINE PROJECTION</span>
+                  <span className="text-muted uppercase tracking-widest text-[9px] block mb-4 font-bold">WHAT HAPPENS OVER TIME</span>
                   <div className="space-y-3">
                     {[
                       { label: "Year 1", value: activePath.timeline.year_1 },
@@ -760,7 +817,7 @@ export default function IntakePage() {
                 <span className="font-mono tracking-[0.2em] font-bold text-main text-sm">PATHSMITH</span>
               </div>
               <p className="text-muted text-xs leading-relaxed font-sans max-w-xs">
-                An AI-powered cognitive strategy engine to detect biases, clarify constraints, and model branching future paths.
+                AI-powered help for life's biggest decisions — explore your options, spot blind spots, and move forward with clarity.
               </p>
             </div>
 
@@ -806,6 +863,9 @@ export default function IntakePage() {
           </div>
         </div>
       </footer>
+
+      {/* History Drawer */}
+      <HistoryDrawer isOpen={showHistory} onClose={() => setShowHistory(false)} />
     </div>
   );
 }

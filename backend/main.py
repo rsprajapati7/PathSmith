@@ -19,8 +19,9 @@ from models import (
     StartSessionRequest, StartSessionResponse,
     GeneratePathsRequest, GeneratePathsResponse,
     WhatIfRequest, WhatIfResponse, UploadDocumentResponse,
+    StressTestRequest, StressTestResponse,
 )
-from chains import run_start_session, run_generate_paths, run_what_if, QuotaExhaustedException
+from chains import run_start_session, run_generate_paths, run_what_if, run_stress_test, QuotaExhaustedException
 
 load_dotenv()
 
@@ -134,4 +135,18 @@ async def explore_whatif(body: WhatIfRequest):
 
     # Track depth of the new branch
     session["branch_depth"][result.modified_path.path_id] = depth + 1
+    return result
+
+@app.post("/api/stress_test", response_model=StressTestResponse)
+async def stress_test(body: StressTestRequest):
+    session = SESSION_STORE.get(body.session_id)
+    llm_config = body.config.model_dump() if body.config else (session.get("config") if session else None)
+
+    try:
+        result = await run_stress_test(body.dilemma, body.paths, llm_config)
+    except QuotaExhaustedException as e:
+        raise HTTPException(status_code=429, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"LLM error: {str(e)}")
+
     return result

@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Path, DecisionMode } from "@/store/decisionStore";
+import { Path, DecisionMode, StressTestResult } from "@/store/decisionStore";
 import { MetricBar } from "./MetricBar";
 import { WhatIfExplorer } from "./WhatIfExplorer";
 
@@ -11,16 +11,61 @@ interface PathCardProps {
   parentMetrics?: Path["metrics"];
   decisionMode?: DecisionMode;
   isRecommended?: boolean;
+  stressTestResult?: StressTestResult;
+  sessionId?: string;
+  dilemma?: string;
+  configJson?: string;
 }
 
 // Per-path color accents
 const PATH_COLORS = ["#34908B", "#4A7FC1", "#7C5CBF"];
 const PATH_LABELS = ["PATH 01", "PATH 02", "PATH 03"];
 
-export function PathCard({ path, index, parentMetrics, decisionMode = "long_term", isRecommended = false }: PathCardProps) {
+export function PathCard({ path, index, parentMetrics, decisionMode = "long_term", isRecommended = false, stressTestResult: initialStressResult, sessionId, dilemma, configJson }: PathCardProps) {
   const [showWhatIf, setShowWhatIf] = useState(false);
+  const [showStressTest, setShowStressTest] = useState(false);
+  const [stressResult, setStressResult] = useState<StressTestResult | undefined>(initialStressResult);
+  const [stressLoading, setStressLoading] = useState(false);
+  const [stressError, setStressError] = useState<string | null>(null);
   const color = PATH_COLORS[index % PATH_COLORS.length] || "#34908B";
   const isShortTerm = decisionMode === "short_term";
+
+  async function handleRunStressTest() {
+    if (stressResult) {
+      setShowStressTest((v) => !v);
+      return;
+    }
+    setStressLoading(true);
+    setStressError(null);
+    try {
+      const config = configJson ? JSON.parse(configJson) : undefined;
+      // We call with just this path; the backend prompt handles it
+      const res = await fetch("/api/stress_test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          session_id: sessionId ?? "standalone",
+          dilemma: dilemma ?? path.summary,
+          paths: [path],
+          config,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail ?? "Stress test failed");
+      }
+      const data = await res.json();
+      const result: StressTestResult = data.results?.[0];
+      if (result) {
+        setStressResult(result);
+        setShowStressTest(true);
+      }
+    } catch (e: any) {
+      setStressError(e.message || "Failed to run stress test");
+    } finally {
+      setStressLoading(false);
+    }
+  }
 
   return (
     <div
@@ -226,7 +271,106 @@ export function PathCard({ path, index, parentMetrics, decisionMode = "long_term
         </ul>
       </div>
 
-      {/* What-If Toggle — only in long term mode */}
+      {/* Stress Test Toggle — only in long term mode */}
+      {!isShortTerm && (
+        <div className="border-t border-border-dim/50 pt-4">
+          <button
+            onClick={handleRunStressTest}
+            disabled={stressLoading}
+            className={`w-full border px-4 py-2.5 font-mono text-[10px] tracking-widest transition-all duration-300 rounded-xl font-bold flex items-center justify-center gap-2 ${
+              showStressTest && stressResult
+                ? "border-danger/60 bg-danger/8 text-danger"
+                : "border-border-dim text-muted hover:border-danger/60 hover:text-danger hover:bg-danger/5"
+            } disabled:opacity-50 disabled:pointer-events-none`}
+          >
+            {stressLoading ? (
+              <>
+                <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                <span>RUNNING STRESS TEST...</span>
+              </>
+            ) : (
+              <span>{showStressTest && stressResult ? "HIDE STRESS TEST ▲" : "RUN STRESS TEST ▼"}</span>
+            )}
+          </button>
+
+          {stressError && (
+            <p className="text-[9px] font-mono text-danger mt-2 font-bold flex items-center gap-1.5">
+              <span>⚠</span> {stressError}
+            </p>
+          )}
+
+          <AnimatePresence>
+            {showStressTest && stressResult && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.35, ease: "easeInOut" }}
+                className="overflow-hidden"
+              >
+                <div className="mt-3 border border-danger/25 bg-danger/4 rounded-xl p-4 space-y-3">
+                  <p className="font-mono text-[9px] font-bold text-danger uppercase tracking-widest">
+                    ⚠ Pre-Mortem Failure Analysis
+                  </p>
+
+                  {/* Resilience Rating */}
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono text-[9px] text-muted uppercase tracking-wider font-bold w-28 shrink-0">Resilience</span>
+                    <div className="flex-1 h-1.5 bg-border-dim rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-700"
+                        style={{
+                          width: `${stressResult.resilience_rating * 10}%`,
+                          background: stressResult.resilience_rating >= 7 ? "#34908B" : stressResult.resilience_rating >= 4 ? "#C2963E" : "#BE123C",
+                        }}
+                      />
+                    </div>
+                    <span
+                      className="font-mono text-[10px] font-bold w-8 text-right"
+                      style={{
+                        color: stressResult.resilience_rating >= 7 ? "#34908B" : stressResult.resilience_rating >= 4 ? "#C2963E" : "#BE123C",
+                      }}
+                    >
+                      {stressResult.resilience_rating}/10
+                    </span>
+                  </div>
+
+                  {/* Failure Scenario */}
+                  <div className="space-y-1.5">
+                    <p className="font-mono text-[9px] text-muted uppercase tracking-wider font-bold">Failure Scenario</p>
+                    <p className="text-[11px] text-muted font-sans leading-relaxed border-l-2 border-danger/40 pl-3">
+                      {stressResult.failure_scenario}
+                    </p>
+                  </div>
+
+                  {/* Mitigation Actions */}
+                  <div className="space-y-1.5">
+                    <p className="font-mono text-[9px] text-muted uppercase tracking-wider font-bold">Mitigation Actions</p>
+                    <ul className="space-y-1.5">
+                      {stressResult.mitigation_actions.map((action, i) => (
+                        <motion.li
+                          key={i}
+                          initial={{ opacity: 0, x: -6 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.07 }}
+                          className="flex items-start gap-1.5 text-[11px] text-muted font-sans"
+                        >
+                          <span className="text-accent font-bold shrink-0 mt-[1px]">→</span>
+                          {action}
+                        </motion.li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
+
       {!isShortTerm && (
         <div className="border-t border-border-dim/50 pt-4 mt-auto">
           <button

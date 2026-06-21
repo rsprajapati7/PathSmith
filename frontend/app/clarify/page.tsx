@@ -106,7 +106,7 @@ export default function ClarifyPage() {
                 </span>
               </div>
               <h1 className="font-sans font-bold text-xl uppercase tracking-tight text-main">
-                COGNITIVE BLUEPRINT
+                YOUR DECISION OVERVIEW
               </h1>
             </div>
             <button
@@ -222,11 +222,11 @@ export default function ClarifyPage() {
         <div className="space-y-4">
           <p className="font-mono text-[9px] text-muted tracking-widest uppercase font-bold flex items-center gap-2">
             <span className="w-1 h-3 bg-danger rounded-full" />
-            DETECTED COGNITIVE BIASES
+            POSSIBLE BLIND SPOTS WE FOUND
           </p>
           {biases.length === 0 ? (
             <div className="border border-border-dim/40 bg-surface/40 rounded-xl p-4 text-xs text-muted font-sans italic">
-              No prominent cognitive biases flagged in session start.
+              No thinking traps detected. Your reasoning looks clear and balanced.
             </div>
           ) : (
             <ul className="space-y-2.5">
@@ -266,10 +266,10 @@ export default function ClarifyPage() {
           <div className="flex items-center justify-between mb-3">
             <div className="space-y-0.5">
               <span className="font-mono text-[9px] tracking-widest text-accent font-bold uppercase block">
-                INPUT REQUIRED
+                STEP 2 OF 3
               </span>
               <h2 className="font-sans font-bold text-xl uppercase tracking-tight text-main">
-                CLARIFY CONSTRAINTS
+                A FEW QUICK QUESTIONS
               </h2>
             </div>
             <div className="text-right">
@@ -290,7 +290,7 @@ export default function ClarifyPage() {
         </div>
 
         <p className="text-muted text-xs font-sans leading-relaxed -mt-4">
-          Answer the following AI-generated prompts to scope real limits, values, and downside tolerance. Selections auto-advance to the next question.
+          Answer a few short questions to help the AI understand your situation better. Your answers will shape the paths it recommends. Tap any answer to move to the next question.
         </p>
 
         <div className="space-y-8 flex-1">
@@ -367,7 +367,7 @@ export default function ClarifyPage() {
                 disabled={!allAnswered}
                 className="glow-btn w-full border-2 border-accent bg-accent text-white font-mono text-[10px] tracking-widest py-4 transition-all duration-300 disabled:opacity-25 disabled:pointer-events-none hover:shadow-lg hover:shadow-accent/25 font-bold uppercase rounded-xl hover:scale-[1.01] active:scale-[0.99]"
               >
-                Model Futures Matrix →
+                See My Paths →
               </button>
             </div>
           )}

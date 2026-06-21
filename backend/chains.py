@@ -10,8 +10,8 @@ from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import ValidationError
-from models import StartSessionResponse, GeneratePathsResponse, WhatIfResponse, Path, Recommendation
-from prompts import START_SESSION_PROMPT, GENERATE_PATHS_PROMPT, GENERATE_PATHS_SHORT_TERM_PROMPT, RECOMMENDATION_PROMPT, WHAT_IF_PROMPT
+from models import StartSessionResponse, GeneratePathsResponse, WhatIfResponse, Path, Recommendation, StressTestResponse
+from prompts import START_SESSION_PROMPT, GENERATE_PATHS_PROMPT, GENERATE_PATHS_SHORT_TERM_PROMPT, RECOMMENDATION_PROMPT, WHAT_IF_PROMPT, STRESS_TEST_PROMPT
 from langchain_community.tools import DuckDuckGoSearchRun
 
 def get_llm(config: Optional[dict], is_powerful: bool, temperature: float = 0.3):
@@ -310,4 +310,41 @@ async def run_what_if(original_path, what_if_scenario: str, config: Optional[dic
                 "Please change your API key / model parameters, or try again later."
             )
         print(f"[run_what_if] Error: {e}")
+        raise e
+
+async def run_stress_test(dilemma: str, paths: list, config: dict = None) -> StressTestResponse:
+    """Run a pre-mortem stress test analysis on all generated paths."""
+    print(f"[run_stress_test] Starting with {len(paths)} paths, config: {config}")
+    try:
+        llm = get_llm(config, is_powerful=False)
+        provider = config.get("provider", "openai").lower() if config else "openai"
+        method = "json_mode" if provider == "ollama" else None
+        structured_llm = llm.with_structured_output(StressTestResponse, method=method)
+        prompt = ChatPromptTemplate.from_template(STRESS_TEST_PROMPT)
+        chain = prompt | structured_llm
+        paths_json = json.dumps([p.model_dump() for p in paths], indent=2)
+        result = await chain.ainvoke({"dilemma": dilemma, "paths_json": paths_json})
+        print(f"[run_stress_test] Success: {len(result.results)} results")
+        return result
+    except Exception as e:
+        error_msg = str(e).upper()
+        if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg or "QUOTA" in error_msg:
+            if config and config.get("model_fast") != "gemma-4-31b-it":
+                print("[run_stress_test] Quota exhausted! Falling back to gemma-4-31b-it...")
+                fallback_config = dict(config) if config else {}
+                fallback_config["model_fast"] = "gemma-4-31b-it"
+                fallback_config["model_powerful"] = "gemma-4-31b-it"
+                try:
+                    llm = get_llm(fallback_config, is_powerful=False)
+                    structured_llm = llm.with_structured_output(StressTestResponse, method=method)
+                    chain = prompt | structured_llm
+                    result = await chain.ainvoke({"dilemma": dilemma, "paths_json": paths_json})
+                    print(f"[run_stress_test] Success (fallback): {len(result.results)} results")
+                    return result
+                except Exception as fallback_err:
+                    e = fallback_err
+            raise QuotaExhaustedException(
+                "API call quota limit reached. Please change your API key or try again later."
+            )
+        print(f"[run_stress_test] Error: {e}")
         raise e

@@ -71,6 +71,21 @@ class GeneratePathsRequest(BaseModel):
     profile_context: Optional[str] = None
     decision_mode: str = Field(default="long_term", description="'long_term' or 'short_term'")
 
+class StressTestResult(BaseModel):
+    path_id: str
+    failure_scenario: str = Field(description="The most realistic and specific way this path could fail within 2-3 years")
+    resilience_rating: int = Field(description="1-10 score: how survivable/recoverable is a failure on this path (10 = highly resilient)")
+    mitigation_actions: List[str] = Field(description="2-3 concrete, actionable steps the user can take now to reduce the risk of failure")
+
+class StressTestResponse(BaseModel):
+    results: List[StressTestResult] = Field(description="Pre-mortem stress test results for all paths")
+
+class StressTestRequest(BaseModel):
+    session_id: str
+    dilemma: str
+    paths: List[Path]
+    config: Optional[LLMConfig] = None
+
 class WhatIfRequest(BaseModel):
     session_id: str
     original_path: Path

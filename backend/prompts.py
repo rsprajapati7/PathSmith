@@ -117,6 +117,24 @@ THE 3 PATHS:
 {paths_json}
 """
 
+STRESS_TEST_PROMPT = """
+You are a ruthless risk analyst performing a PRE-MORTEM analysis. The user is considering the following life decision dilemma and has been presented with 3 distinct paths. Your job: for each path, model HOW IT COULD FAIL.
+
+Rules:
+- Think adversarially. Assume something goes wrong — what is the single most realistic and damaging failure mode for each path?
+- The failure_scenario must be highly specific and grounded in the realities of that path (not generic). Name actual causes: market shifts, personal burnout, relationship breakdown, regulatory changes, etc.
+- resilience_rating (1-10): How easily can the user recover from this failure? 10 = very easy to bounce back (transferable skills, savings buffer). 1 = catastrophic, nearly unrecoverable.
+- mitigation_actions: 2-3 concrete, actionable steps the user can start NOW to reduce the probability or severity of the failure scenario.
+
+Output ONLY valid JSON matching the StressTestResponse schema. No preamble, no markdown.
+
+DILEMMA:
+{dilemma}
+
+THE PATHS:
+{paths_json}
+"""
+
 WHAT_IF_PROMPT = """
 You are a scenario modeller. Take the provided Path object and apply the user's "what-if" variable to it. This is a branching simulation — recalculate Metrics, update the Timeline, and generate new hidden_tradeoffs that reflect the changed assumption. Assign a new path_id by appending "_branch" + a random 4-digit number.
 

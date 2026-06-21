@@ -30,6 +30,13 @@ export interface Recommendation {
   key_factors: string[];
 }
 
+export interface StressTestResult {
+  path_id: string;
+  failure_scenario: string;
+  resilience_rating: number; // 1-10
+  mitigation_actions: string[];
+}
+
 export interface ClarifyingQuestion {
   question_id: string;
   text: string;
@@ -46,6 +53,16 @@ export interface LLMConfig {
 
 export type DecisionMode = "long_term" | "short_term";
 
+export interface HistoryEntry {
+  id: string;
+  timestamp: number;
+  dilemma: string;
+  decisionMode: DecisionMode;
+  paths: Path[];
+  recommendation: Recommendation | null;
+  biases: string[];
+}
+
 interface DecisionStore {
   dilemma: string;
   session_id: string;
@@ -58,6 +75,8 @@ interface DecisionStore {
   profileContext: string;
   decisionMode: DecisionMode;
   recommendation: Recommendation | null;
+  stressTest: StressTestResult[] | null;
+  history: HistoryEntry[];
   setDilemma: (d: string) => void;
   setSession: (id: string, biases: string[], questions: ClarifyingQuestion[]) => void;
   setAnswers: (a: Record<string, string>) => void;
@@ -67,8 +86,14 @@ interface DecisionStore {
   setProfileContext: (text: string) => void;
   setDecisionMode: (mode: DecisionMode) => void;
   setRecommendation: (r: Recommendation | null) => void;
+  setStressTest: (results: StressTestResult[] | null) => void;
+  saveToHistory: () => void;
+  loadFromHistory: (id: string) => void;
+  deleteFromHistory: (id: string) => void;
   reset: () => void;
 }
+
+const HISTORY_KEY = "pathsmith_history";
 
 const getInitialConfig = (): LLMConfig => {
   if (typeof window !== "undefined") {
@@ -90,7 +115,27 @@ const getInitialConfig = (): LLMConfig => {
   };
 };
 
-export const useDecisionStore = create<DecisionStore>((set) => ({
+const getInitialHistory = (): HistoryEntry[] => {
+  if (typeof window !== "undefined") {
+    const saved = localStorage.getItem(HISTORY_KEY);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return [];
+      }
+    }
+  }
+  return [];
+};
+
+const saveHistoryToStorage = (history: HistoryEntry[]) => {
+  if (typeof window !== "undefined") {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  }
+};
+
+export const useDecisionStore = create<DecisionStore>((set, get) => ({
   dilemma: "",
   session_id: "",
   biases: [],
@@ -102,6 +147,8 @@ export const useDecisionStore = create<DecisionStore>((set) => ({
   profileContext: "",
   decisionMode: "long_term",
   recommendation: null,
+  stressTest: null,
+  history: getInitialHistory(),
   setDilemma: (d) => set({ dilemma: d }),
   setSession: (id, biases, questions) => set({ session_id: id, biases, questions }),
   setAnswers: (a) => set({ answers: a }),
@@ -124,6 +171,44 @@ export const useDecisionStore = create<DecisionStore>((set) => ({
   setProfileContext: (text) => set({ profileContext: text }),
   setDecisionMode: (mode) => set({ decisionMode: mode }),
   setRecommendation: (r) => set({ recommendation: r }),
+  setStressTest: (results) => set({ stressTest: results }),
+  saveToHistory: () => {
+    const state = get();
+    if (!state.paths.length) return;
+    const entry: HistoryEntry = {
+      id: `hist_${Date.now()}`,
+      timestamp: Date.now(),
+      dilemma: state.dilemma,
+      decisionMode: state.decisionMode,
+      paths: state.paths,
+      recommendation: state.recommendation,
+      biases: state.biases,
+    };
+    const newHistory = [entry, ...state.history].slice(0, 20); // keep latest 20
+    saveHistoryToStorage(newHistory);
+    set({ history: newHistory });
+  },
+  loadFromHistory: (id) => {
+    const state = get();
+    const entry = state.history.find((h) => h.id === id);
+    if (!entry) return;
+    set({
+      dilemma: entry.dilemma,
+      paths: entry.paths,
+      recommendation: entry.recommendation,
+      biases: entry.biases,
+      decisionMode: entry.decisionMode,
+      stressTest: null,
+      session_id: entry.id, // use history id as pseudo-session
+    });
+  },
+  deleteFromHistory: (id) => {
+    set((state) => {
+      const newHistory = state.history.filter((h) => h.id !== id);
+      saveHistoryToStorage(newHistory);
+      return { history: newHistory };
+    });
+  },
   reset: () =>
     set((state) => ({
       dilemma: "",
@@ -135,8 +220,10 @@ export const useDecisionStore = create<DecisionStore>((set) => ({
       branches: {},
       profileContext: "",
       recommendation: null,
-      // Keep configuration and decision mode persistent across sessions
+      stressTest: null,
+      // Keep configuration, decision mode, and history persistent across sessions
       config: state.config,
       decisionMode: state.decisionMode,
+      history: state.history,
     })),
 }));

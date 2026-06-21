@@ -11,6 +11,11 @@
   box-sizing: border-box;
 }
 
+html {
+  background-color: #FDF4AF;
+  overflow-x: hidden;
+}
+
 body {
   background-color: #FDF4AF;
   color: #122a2c;
